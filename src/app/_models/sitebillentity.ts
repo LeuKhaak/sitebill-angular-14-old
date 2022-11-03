@@ -3,10 +3,10 @@ export enum FormType {
   inline="inline"
 }
 export class SitebillEntity {
-  private app_name: string;
-  private table_name: string;
-  primary_key: string;
-  key_value: number;
+  private app_name: string = '';
+  private table_name: string = '';
+  primary_key: string = '';
+  key_value: number | null = null;
   columns: string[];
   columns_index: any[];
   default_columns_list: string[];
@@ -22,9 +22,9 @@ export class SitebillEntity {
   private title: string;
   private form_type: string;
   private ql_items: any;
-  private params: {};
-  private hidden_items: {};
-  private default_values: {};
+  private params: any;
+  private hidden_items: any;
+  private default_values: any;
   private delete_disabled = false;
 
   constructor() {
@@ -35,12 +35,12 @@ export class SitebillEntity {
     this.default_params = [];
     this.hidden_edit_columns = [];
     this.enable_collections = false;
-    this.hook = null;
+    this.hook = '';
     this.readonly = false;
     this.enable_comment = true;
-    this.app_url = null;
-    this.app_session_key = null;
-    this.title = null;
+    this.app_url = '';
+    this.app_session_key = '';
+    this.title = '';
     this.form_type = FormType.simple;
     this.params = {};
     this.hidden_items = {};
@@ -59,11 +59,11 @@ export class SitebillEntity {
     return this.default_params;
   }
 
-  set_default_params(default_params) {
+  set_default_params(default_params: any) {
     this.default_params = default_params;
   }
 
-  set_default_columns_list(default_columns_list) {
+  set_default_columns_list(default_columns_list: any) {
     this.default_columns_list = default_columns_list;
   }
 
@@ -156,11 +156,11 @@ export class SitebillEntity {
     this.readonly = readonly;
   }
 
-  hide_column_edit(column_name) {
+  hide_column_edit(column_name: string) {
     this.hidden_edit_columns.push(column_name);
   }
 
-  get_hidden_column_edit(column_name) {
+  get_hidden_column_edit(column_name: string) {
     if ( this.hidden_edit_columns.indexOf(column_name) !== -1){
       return true;
     }
@@ -169,7 +169,7 @@ export class SitebillEntity {
 
   get_app_url() {
     try {
-      if ( this.app_url !== undefined && this.app_url != null ) {
+      if ( this.app_url !== undefined && this.app_url != '' ) {
         return this.app_url;
       }
     } catch (e) {
@@ -184,7 +184,7 @@ export class SitebillEntity {
 
   get_app_session_key() {
     try {
-      if ( this.app_session_key !== undefined && this.app_session_key != null ) {
+      if ( this.app_session_key !== undefined && this.app_session_key != '' ) {
         return this.app_session_key;
       }
     } catch (e) {
@@ -208,25 +208,25 @@ export class SitebillEntity {
     return this.form_type;
   }
 
-  set_form_type(form_type: string) {
+  set_form_type(form_type: FormType) {
     this.form_type = FormType[form_type];
   }
 
-  get_model_value(key:string) {
+  get_model_value(key:any) {
     if ( this.model[key] ) {
       return this.model[key].getValue();
     }
     return null;
   }
 
-  get_model_item(key:string) {
+  get_model_item(key:any) {
     if ( this.model[key] ) {
       return this.model[key];
     }
     return null;
   }
 
-  get_model_value_string(key:string) {
+  get_model_value_string(key:any) {
     if ( this.model[key] ) {
       return this.model[key].getValueString();
     }
@@ -285,7 +285,7 @@ export class SitebillModelItem {
   select_data_indexed: any;
   assign_to: string;
   combo: string;
-  dbtype: string;
+  dbtype: string = '';
   entity: string;
   group_id: string;
   group_id_array: [];
@@ -316,7 +316,7 @@ export class SitebillModelItem {
   api: ApiCall;
 
   // Дополнительные поля
-  hidden: boolean;
+  hidden: boolean = false;
   active_in_topic_array: any;
   readonly type_native: string;
   multiple: boolean;

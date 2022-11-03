@@ -10,9 +10,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {GridModule} from './main/grid/grid.module';
 
+import {SnackBarComponent} from './main/snackbar/snackbar.component';
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SnackBarComponent,
   ],
   imports: [
     BrowserModule,
