@@ -59,11 +59,11 @@ export class SitebillEntity {
     return this.default_params;
   }
 
-  set_default_params(default_params: any) {
+  set_default_params(default_params: string[]) {
     this.default_params = default_params;
   }
 
-  set_default_columns_list(default_columns_list: any) {
+  set_default_columns_list(default_columns_list: string[]) {
     this.default_columns_list = default_columns_list;
   }
 
@@ -118,7 +118,7 @@ export class SitebillEntity {
     return this.enable_collections;
   }
 
-  set_key_value(key_value: any) {
+  set_key_value(key_value: number) {
     this.key_value = key_value;
   }
 
@@ -175,7 +175,7 @@ export class SitebillEntity {
     } catch (e) {
 
     }
-    return null;
+    return '';
   }
 
   set_app_url(app_url: string) {
@@ -190,7 +190,7 @@ export class SitebillEntity {
     } catch (e) {
 
     }
-    return null;
+    return '';
   }
 
   set_app_session_key(app_session_key: string) {
@@ -212,21 +212,21 @@ export class SitebillEntity {
     this.form_type = FormType[form_type];
   }
 
-  get_model_value(key:any) {
+  get_model_value(key: number) {
     if ( this.model[key] ) {
       return this.model[key].getValue();
     }
     return null;
   }
 
-  get_model_item(key:any) {
+  get_model_item(key: number) {
     if ( this.model[key] ) {
       return this.model[key];
     }
     return null;
   }
 
-  get_model_value_string(key:any) {
+  get_model_value_string(key: number) {
     if ( this.model[key] ) {
       return this.model[key].getValueString();
     }

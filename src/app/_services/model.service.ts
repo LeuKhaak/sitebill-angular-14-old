@@ -1,29 +1,40 @@
-import {Injectable, Inject, isDevMode, Output, EventEmitter} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {APP_CONFIG, AppConfig} from '../app.config.module';
-import {currentUser, UserProfile} from '../_models/currentuser';
-import {ApiCall, SitebillEntity, SitebillModelItem} from '../_models/sitebillentity';
-import {Router} from '@angular/router';
-import {FuseConfigService} from '../../@fuse/services/config.service';
-import {FilterService} from './filter.service';
-import {StorageService} from './storage.service';
-import {SnackService} from './snack.service';
-import {Observable, Subject, timer} from 'rxjs';
-import {SitebillSession} from '../_models/sitebillsession';
-import {takeUntil} from 'rxjs/operators';
-
+import {
+  Injectable,
+  Inject,
+  isDevMode,
+  Output,
+  EventEmitter,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { APP_CONFIG, AppConfig } from '../app.config.module';
+import { UserProfile, CurrentUser } from '../_models/currentuser';
+import {
+  ApiCall,
+  SitebillEntity,
+  SitebillModelItem,
+} from '../_models/sitebillentity';
+import { Router } from '@angular/router';
+import { FuseConfigService } from '../../@fuse/services/config.service';
+import { FilterService } from './filter.service';
+import { StorageService } from './storage.service';
+import { SnackService } from './snack.service';
+import { Observable, Subject, timer } from 'rxjs';
+import { SitebillSession } from '../_models/sitebillsession';
+import { takeUntil } from 'rxjs/operators';
+import any = jasmine.any;
 
 @Injectable()
 export class ModelService {
   private api_url = '';
-  protected currentUser: currentUser;
+  protected currentUser: CurrentUser;
+  public defaultCurrentUser: CurrentUser;
   public entity: SitebillEntity;
   private need_reload = false;
   private session_key_validated = false;
   private nobody_mode = false;
   private current_user_profile: UserProfile;
-  private sitebill_started: boolean;
-  private config_loaded: boolean;
+  private sitebill_started = false;
+  private config_loaded = false;
   private sitebill_config: any;
   private current_entity: SitebillEntity;
   private navbar_hidden: boolean;
@@ -31,10 +42,12 @@ export class ModelService {
   private model_redirect = true;
 
   @Output() config_loaded_emitter: EventEmitter<any> = new EventEmitter();
-  @Output() sitebill_loaded_complete_emitter: EventEmitter<any> = new EventEmitter();
+  @Output() sitebill_loaded_complete_emitter: EventEmitter<any> =
+    new EventEmitter();
   @Output() need_reload_emitter: EventEmitter<any> = new EventEmitter();
   @Output() valid_user_emitter: EventEmitter<any> = new EventEmitter();
-  @Output() init_permissions_complete_emitter: EventEmitter<any> = new EventEmitter();
+  @Output() init_permissions_complete_emitter: EventEmitter<any> =
+    new EventEmitter();
 
   private dom_sitebill_config: any;
   private install_mode: boolean;
@@ -43,8 +56,6 @@ export class ModelService {
   public init_config_complete = false;
   protected _unsubscribeAll: Subject<any>;
 
-
-
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -52,43 +63,58 @@ export class ModelService {
     public storageService: StorageService,
     private filterService: FilterService,
     protected _snackService: SnackService,
-    @Inject(APP_CONFIG) private config: AppConfig,
+    @Inject(APP_CONFIG) private config: AppConfig
   ) {
     this._unsubscribeAll = new Subject();
 
     this.navbar_hidden = false;
     this.toolbar_hidden = false;
     // console.log('ModelService constructor');
-    this.entity = new SitebillEntity;
-    this.entity.set_app_name(null);
-    this.entity.set_table_name(null);
-    this.entity.primary_key = null;
+    this.entity = new SitebillEntity();
+    this.entity.set_app_name('');
+    this.entity.set_table_name('');
+    this.entity.primary_key = '';
     this.entity.key_value = null;
     this.sitebill_config = {};
     this.dom_sitebill_config = {};
     this.install_mode = false;
-
+    this.defaultCurrentUser = new (class implements CurrentUser {
+      admin_panel_login = 0;
+      profile = new UserProfile();
+      session_key = '';
+      success = 0;
+      user_id = -1;
+    })();
+    this.currentUser = this.defaultCurrentUser;
+    this.current_entity = new SitebillEntity();
 
     this.current_user_profile = new UserProfile();
 
-    this.currentUser = JSON.parse(this.storageService.getItem('currentUser')) || [];
-    this.set_api_url(this.storageService.getItem('api_url'));
+    const user = this.storageService.getItem('currentUser');
+    if (typeof user !== 'string') return;
+    this.currentUser = JSON.parse(user) || [];
+    const url = this.storageService.getItem('api_url');
+    if (typeof url !== 'string') return;
+    this.set_api_url(url);
   }
 
   get sitebill_session(): SitebillSession {
     return {
       sessionId: this.get_session_key(),
-      clientUrl: ( this.get_api_url() !== '' ? this.get_api_url() : window.location.protocol + '//' + window.location.hostname ),
+      clientUrl:
+        this.get_api_url() !== ''
+          ? this.get_api_url()
+          : window.location.protocol + '//' + window.location.hostname,
     };
   }
 
-
-  set_api_url(api_url: string) { // get-api
+  set_api_url(api_url: string) {
+    // get-api
     this.api_url = api_url;
   }
 
   onSitebillStart() {
-    if ( !this.sitebill_started ) {
+    if (!this.sitebill_started) {
       // console.log('Sitebill started');
       this.init_config();
       this.init_permissions();
@@ -99,17 +125,15 @@ export class ModelService {
     return 'https://www.etown.ru';
   }
 
-
-  get_api_url(ignore_entity_url = false) {  // get-api
-    if ( !ignore_entity_url ) {
+  get_api_url(ignore_entity_url = false) {
+    // get-api
+    if (!ignore_entity_url) {
       try {
         if (this.get_current_entity().get_app_url() != null) {
           return this.get_current_entity().get_app_url();
           // console.log(this.get_current_entity().get_app_name() + Math.random());
         }
-      } catch (e) {
-
-      }
+      } catch (e) {}
     }
     if (isDevMode() && (this.api_url == '' || this.api_url === null)) {
       return this.config.apiEndpoint;
@@ -122,7 +146,9 @@ export class ModelService {
   }
 
   all_checks_passes() {
-    if ( this.get_nobody_mode() || this.get_user_id() > 0 ) {
+    const id = this.get_user_id();
+    if (typeof id !== 'number') return;
+    if (this.get_nobody_mode() || id > 0) {
       console.log('all_checks_passes success');
       return true;
     }
@@ -130,7 +156,7 @@ export class ModelService {
   }
 
   final_state() {
-    if ( this.init_config_complete && this.init_permissions_complete ) {
+    if (this.init_config_complete && this.init_permissions_complete) {
       console.log('final_state true');
       return true;
     }
@@ -149,9 +175,16 @@ export class ModelService {
   }
 
   enable_guest_mode() {
-    console.log('apps.realty.enable_guest_mode ' + this.getConfigValue('apps.realty.enable_guest_mode'));
-    if ( this.getConfigValue('apps.realty.enable_guest_mode') === '1') {
-      if ( this.get_user_id() === null || this.get_user_id() === 0 || this.get_user_id() === undefined ) {
+    console.log(
+      'apps.realty.enable_guest_mode ' +
+        this.getConfigValue('apps.realty.enable_guest_mode')
+    );
+    if (this.getConfigValue('apps.realty.enable_guest_mode') === '1') {
+      if (
+        this.get_user_id() === null ||
+        this.get_user_id() === 0 ||
+        this.get_user_id() === undefined
+      ) {
         this.get_cms_session()
           .pipe(takeUntil(this._unsubscribeAll))
           .subscribe((result: any) => {
@@ -161,7 +194,10 @@ export class ModelService {
               const storage = JSON.parse(result) || [];
               if (storage.user_id > 0) {
                 console.log('cms user_id = ' + storage.user_id);
-                this.storageService.setItem('currentUser', JSON.stringify(storage));
+                this.storageService.setItem(
+                  'currentUser',
+                  JSON.stringify(storage)
+                );
                 this.reinit_currentUser();
                 this.after_config_loaded();
                 return true;
@@ -174,40 +210,40 @@ export class ModelService {
 
             if (finaly_need_guest) {
               console.log('need guest mode');
-              if ( this.get_session_key() === null ) {
+              if (this.get_session_key() === null) {
                 this.init_nobody_user_storage();
-              } else if ( this.get_session_key() === 'nobody' ) {
+              } else if (this.get_session_key() === 'nobody') {
                 this.enable_nobody_mode();
-              } else if ( this.get_session_key() === undefined ) {
+              } else if (this.get_session_key() === undefined) {
                 this.init_nobody_user_storage();
               } else {
                 this.enable_nobody_mode();
               }
             }
-
           });
       }
     } else {
       console.log('guest mode not enabled');
-      if ( !this.nobody_first_login ) {
-        this._snackService.message('Для работы с разделом вы должны авторизоваться.');
+      if (!this.nobody_first_login) {
+        this._snackService.message(
+          'Для работы с разделом вы должны авторизоваться.'
+        );
         const timerPeriod = 1000;
         const numbers = timer(timerPeriod);
         numbers
           .pipe(takeUntil(this._unsubscribeAll))
-          .subscribe(x => this.router.navigate(['/login/']));
+          .subscribe((x) => this.router.navigate(['/login/']));
         this.nobody_first_login = true;
       }
     }
   }
 
-  enable_need_reload( from = '') {
-    if ( from !== '' ) {
+  enable_need_reload(from = '') {
+    if (from !== '') {
       // console.log('enable_need_reload from ' + from);
     }
     // console.log('enable_need_reload');
     this.need_reload = true;
-
   }
 
   disable_need_reload() {
@@ -223,7 +259,7 @@ export class ModelService {
   }
 
   session_key_validate() {
-    if ( !this.session_key_validated ) {
+    if (!this.session_key_validated) {
       // console.log('session_key_validate');
       this.load_current_user_profile();
     }
@@ -239,26 +275,26 @@ export class ModelService {
     this.session_key_validated = false;
   }
 
-  get_session_key() { // get-session
+  get_session_key() {
+    // get-session
     try {
       if (this.get_current_entity().get_app_session_key() != null) {
         return this.get_current_entity().get_app_session_key();
         // console.log(this.get_current_entity().get_app_name() + Math.random());
       }
-    } catch (e) {
-
-    }
+    } catch (e) {}
 
     // console.log('|get_session_key');
     // console.log(this.currentUser);
     // console.log('get_session_key|');
-    if (this.currentUser === null) {
-      return null;
+    if (this.currentUser.user_id === -1) {
+      return '';
     }
     return this.currentUser.session_key;
   }
 
-  get_session_key_safe() {  // get-session
+  get_session_key_safe() {
+    // get-session
     const session_key = this.get_session_key();
     if (!this.is_validated_session_key()) {
       this.validateKey(session_key)
@@ -266,14 +302,14 @@ export class ModelService {
         .subscribe((result: any) => {
           if (result.error === 'check_session_key_failed') {
             console.log('check_session_key_failed need reload');
-            if ( this.is_model_redirect_enabled() ) {
+            if (this.is_model_redirect_enabled()) {
               console.log('reset storage');
               this.reset_local_user_storage();
               const refresh_url = this.router.url;
               this.enable_need_reload('get_session_key_safe');
               this.router.navigate([refresh_url]);
             }
-            if ( this.getDomConfigValue('standalone_mode' ) ) {
+            if (this.getDomConfigValue('standalone_mode')) {
               this.reset_local_user_storage();
               this.need_reload_emitter.emit(true);
             }
@@ -283,23 +319,26 @@ export class ModelService {
         });
     }
     if (session_key == null) {
-      if ( this.is_model_redirect_enabled() ) {
+      if (this.is_model_redirect_enabled()) {
         this.logout();
       }
-
     }
     return session_key;
   }
 
   get_user_id() {
-    if (this.currentUser == null) {
+    if (this.currentUser.user_id === -1) {
       return null;
     }
     return this.currentUser.user_id;
   }
 
   is_logged_in() {
-    if ( this.get_user_id() === null || this.get_user_id() === 0 || this.get_user_id() === undefined) {
+    if (
+      this.get_user_id() === null ||
+      this.get_user_id() === 0 ||
+      this.get_user_id() === undefined
+    ) {
       return false;
     }
     return true;
@@ -311,14 +350,17 @@ export class ModelService {
     this.init_nobody_session()
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe((result: any) => {
-        if ( result.error === 'check_session_key_failed' ) {
+        if (result.error === 'check_session_key_failed') {
           this.reset_local_user_storage();
           const refresh_url = this.router.url;
           this.enable_need_reload('init_nobody_user_storage');
           this.router.navigate([refresh_url]);
         } else {
           this.currentUser = result;
-          this.storageService.setItem('currentUser', JSON.stringify(this.currentUser));
+          this.storageService.setItem(
+            'currentUser',
+            JSON.stringify(this.currentUser)
+          );
           this.enable_nobody_mode();
         }
       });
@@ -327,33 +369,42 @@ export class ModelService {
   reset_local_user_storage() {
     // console.log('reset_local_user_storage');
     localStorage.removeItem('currentUser');
-    if (this.currentUser != null) {
-      this.currentUser.session_key = null;
-      this.currentUser = null;
+    if (this.currentUser.user_id !== -1) {
+      this.currentUser.session_key = '';
+      this.currentUser = this.defaultCurrentUser;
     }
   }
 
   logout() {
-    if ( this.all_checks_passes() ) {
+    if (this.all_checks_passes()) {
       console.log('run logout');
-      this.model_logout()
-        .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(
-          data => {
-            this.enable_guest_mode();
+      const logout = this.model_logout();
+      if (!logout) return;
+      logout.pipe(takeUntil(this._unsubscribeAll)).subscribe(
+        (data) => {
+          this.enable_guest_mode();
 
-            this.router.navigate(['/logout']);
-          },
-          error => {
-            console.log(error);
-          });
+          this.router.navigate(['/logout']);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
     }
   }
 
   model_logout() {
-    this.currentUser = JSON.parse(this.storageService.getItem('currentUser')) || [];
+    const user = this.storageService.getItem('currentUser');
+    if (typeof user !== 'string') return;
+    this.currentUser = JSON.parse(user) || [];
 
-    const body = {action: 'oauth', do: 'logout', session_key: this.currentUser.session_key};
+    const body = this.currentUser
+      ? {
+          action: 'oauth',
+          do: 'logout',
+          session_key: this.currentUser.session_key,
+        }
+      : null;
     const url = `${this.api_url}/apps/api/rest.php`;
 
     this.disable_menu();
@@ -364,31 +415,34 @@ export class ModelService {
     return this.http.post<any>(url, body);
   }
 
-
-  disable_menu() { // ui
+  disable_menu() {
+    // ui
     // console.log('disable menu');
     this._fuseConfigService.config = {
       layout: {
         navbar: {
-          hidden: true
+          hidden: true,
         },
         toolbar: {
-          hidden: true
+          hidden: true,
         },
         footer: {
-          hidden: true
-        }
-      }
+          hidden: true,
+        },
+      },
     };
   }
 
-  reinit_currentUser_standalone(storage) {
+  reinit_currentUser_standalone(storage: any) {
+    // typeof ???
     this.storageService.setItem('currentUser', JSON.stringify(storage));
-    this.currentUser = JSON.parse(this.storageService.getItem('currentUser')) || [];
+    this.currentUser =
+      JSON.parse(this.storageService.getItem('currentUser')) || [];
   }
 
   reinit_currentUser() {
-    this.currentUser = JSON.parse(this.storageService.getItem('currentUser')) || [];
+    this.currentUser =
+      JSON.parse(this.storageService.getItem('currentUser')) || [];
     this.disable_need_reload();
     // console.log('reinit current user');
     // console.log(this.storageService.getItem('currentUser'));
@@ -396,7 +450,14 @@ export class ModelService {
     // console.log('reinit complete');
   }
 
-  load(model_name, grid_item, filter_params_json, owner, page, per_page) {
+  load(
+    model_name: string,
+    grid_item: string,
+    filter_params_json: { [index: string]: any },
+    owner: string,
+    page: number,
+    per_page: number
+  ) {
     const body = {
       action: 'model',
       do: 'get_data',
@@ -406,20 +467,26 @@ export class ModelService {
       per_page: per_page,
       params: filter_params_json,
       session_key: this.get_session_key_safe(),
-      grid_item: grid_item
+      grid_item: grid_item,
     };
     // console.log(body);
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   // Возвращаем только записи, которые используются в связанной таблице
-  load_dictionary(columnName) {
-    const request = {action: 'model', do: 'load_dictionary', columnName: columnName, anonymous: true, session_key: this.get_session_key_safe()};
+  load_dictionary(columnName: string) {
+    const request = {
+      action: 'model',
+      do: 'load_dictionary',
+      columnName: columnName,
+      anonymous: true,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
   // Возвращаем только записи, которые используются в связанной таблице
-  load_dictionary_model(model_name, columnName, term = '') {
+  load_dictionary_model(model_name: string, columnName: string, term = '') {
     const request = {
       action: 'model',
       do: 'load_dictionary',
@@ -427,12 +494,17 @@ export class ModelService {
       model_name: model_name,
       term: term,
       anonymous: true,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
-  load_dictionary_model_with_params(model_name, columnName, params, switch_off_ai_mode = false) {
+  load_dictionary_model_with_params(
+    model_name: string,
+    columnName: string,
+    params: { [index: string]: any },
+    switch_off_ai_mode = false
+  ) {
     const request = {
       action: 'model',
       do: 'load_dictionary_with_params',
@@ -441,7 +513,7 @@ export class ModelService {
       params: params,
       switch_off_ai_mode: switch_off_ai_mode,
       anonymous: true,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
@@ -452,9 +524,9 @@ export class ModelService {
       do: api_call.method,
       params: api_call.params,
       anonymous: api_call.anonymous,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    request = {...request, ...standard_params};
+    request = { ...request, ...standard_params };
     console.log(request);
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
@@ -466,7 +538,7 @@ export class ModelService {
           (result) => {
             resolve(result);
           },
-          error => {
+          (error) => {
             console.log(error);
             reject(new Error(error));
           }
@@ -474,14 +546,12 @@ export class ModelService {
     });
   }
 
-
   api_request(request: any) {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
-
   // Возвращает все записи
-  load_dictionary_model_all(model_name, columnName) {
+  load_dictionary_model_all(model_name: string, columnName: string) {
     const request = {
       action: 'model',
       do: 'load_dictionary',
@@ -489,39 +559,58 @@ export class ModelService {
       model_name: model_name,
       switch_off_ai_mode: true,
       anonymous: true,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
-  get_max(model_name, columnName) {
-    const request = {action: 'model', do: 'get_max', model_name: model_name, columnName: columnName, anonymous: true, session_key: this.get_session_key_safe()};
+  get_max(model_name: string, columnName: string) {
+    const request = {
+      action: 'model',
+      do: 'get_max',
+      model_name: model_name,
+      columnName: columnName,
+      anonymous: true,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
-  load_only_model(model_name, anonymous = false) {
+  load_only_model(model_name: string, anonymous = false) {
     const load_data_request = {
       action: 'model',
       do: 'load_only_model',
       model_name: model_name,
-      anonymous: (anonymous ? 1 : ''),
-      session_key: this.get_session_key_safe()
+      anonymous: anonymous ? 1 : '',
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-  loadByUri(model_name, entity_uri ) {
+  loadByUri(model_name: string, entity_uri: string) {
     const load_data_request = {
       action: 'model',
       do: 'load_data',
       model_name: model_name,
       entity_uri: entity_uri,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-  loadById(model_name, primary_key, key_value, ql_items = null ) {
+  loadById(
+    model_name: string,
+    primary_key: string,
+    key_value: string,
+    ql_items = null
+  ) {
+    // key_value: string | null
     const load_data_request = {
       action: 'model',
       do: 'load_data',
@@ -529,42 +618,58 @@ export class ModelService {
       primary_key: primary_key,
       key_value: key_value,
       ql_items: ql_items,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
   map_model(row_model: any) {
-    const good_model = [];
-    Object.entries(row_model).forEach(
-      (key, value) => {
-        good_model[key[0]] = new SitebillModelItem(key[1]);
-      }
-    );
+    type ArrayTypes = Record<string, any>;
+    const good_model: ArrayTypes = [];
+    Object.entries(row_model).forEach((key, value) => {
+      good_model[key[0]] = new SitebillModelItem(key[1]);
+    });
     return good_model;
   }
 
-  validateKey(session_key) {
+  validateKey(session_key: string) {
     const model_name = 'data';
     const primary_key = 'id';
     const key_value = 1;
-    const load_data_request = {action: 'model', do: 'load_data', model_name: model_name, primary_key: primary_key, key_value: key_value, session_key: session_key};
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    const load_data_request = {
+      action: 'model',
+      do: 'load_data',
+      model_name: model_name,
+      primary_key: primary_key,
+      key_value: key_value,
+      session_key: session_key,
+    };
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-  native_insert(model_name, ql_items, only_ql = null) {
+  native_insert(
+    model_name: string,
+    ql_items: { [index: string]: any },
+    only_ql = null
+  ) {
     const body = {
       action: 'model',
       do: 'native_insert',
       model_name: model_name,
       ql_items: ql_items,
       only_ql: only_ql,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  native_update(model_name, key_value, ql_items, only_ql = null) {
+  native_update(model_name: string, key_value, ql_items, only_ql = null) {
     const body = {
       action: 'model',
       do: 'native_update',
@@ -572,13 +677,20 @@ export class ModelService {
       key_value: key_value,
       ql_items: ql_items,
       only_ql: only_ql,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   update(model_name, key_value, ql_items) {
-    const body = {action: 'model', do: 'graphql_update', model_name: model_name, key_value: key_value, ql_items: ql_items, session_key: this.get_session_key_safe()};
+    const body = {
+      action: 'model',
+      do: 'graphql_update',
+      model_name: model_name,
+      key_value: key_value,
+      ql_items: ql_items,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
@@ -590,7 +702,7 @@ export class ModelService {
       only_ql: true,
       key_value: key_value,
       ql_items: ql_items,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
@@ -603,40 +715,78 @@ export class ModelService {
       column_name: column_name,
       key: key,
       params: params,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   delete(model_name, primary_key, key_value) {
-    const body = {action: 'model', do: 'delete', model_name: model_name, key_value: key_value, primary_key: primary_key, session_key: this.get_session_key_safe()};
+    const body = {
+      action: 'model',
+      do: 'delete',
+      model_name: model_name,
+      key_value: key_value,
+      primary_key: primary_key,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   report(model_name, primary_key, key_value, complaint_id) {
-    const body = {action: 'model', do: 'report', model_name: model_name, key_value: key_value, primary_key: primary_key, complaint_id: complaint_id, session_key: this.get_session_key_safe()};
+    const body = {
+      action: 'model',
+      do: 'report',
+      model_name: model_name,
+      key_value: key_value,
+      primary_key: primary_key,
+      complaint_id: complaint_id,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   save_search(params, search_title) {
-    const body = {action: 'mysearch', do: 'save', params: params, search_title: search_title, session_key: this.get_session_key_safe()};
+    const body = {
+      action: 'mysearch',
+      do: 'save',
+      params: params,
+      search_title: search_title,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   new_empty_record(model_name) {
-    const body = {action: 'model', do: 'new_empty_record', model_name: model_name, session_key: this.get_session_key_safe()};
+    const body = {
+      action: 'model',
+      do: 'new_empty_record',
+      model_name: model_name,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   load_grid_columns(entity: SitebillEntity) {
     let body = {};
-    body = {action: 'model', do: 'load_grid_columns', model_name: entity.get_table_name(), session_key: this.get_session_key_safe()};
+    body = {
+      action: 'model',
+      do: 'load_grid_columns',
+      model_name: entity.get_table_name(),
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   format_grid(entity: SitebillEntity, grid_items: string[], per_page) {
     let body = {};
-    body = {action: 'model', do: 'format_grid', model_name: entity.get_table_name(), grid_items: grid_items, per_page: per_page, session_key: this.get_session_key_safe()};
+    body = {
+      action: 'model',
+      do: 'format_grid',
+      model_name: entity.get_table_name(),
+      grid_items: grid_items,
+      per_page: per_page,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
@@ -649,7 +799,7 @@ export class ModelService {
       primary_key: key_name,
       key_value: key_value,
       image_field: field_name,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
@@ -664,110 +814,142 @@ export class ModelService {
       memorylist_id: memorylist_id,
       title: title,
       data_id: data_id,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   get_cms_session() {
     let body = {};
-    body = {layer: 'native_ajax', get_cms_session: '1'};
+    body = { layer: 'native_ajax', get_cms_session: '1' };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   init_nobody_session() {
     let body = {};
-    body = { action: 'init_nobody_session', session_key: 'nobody'};
+    body = { action: 'init_nobody_session', session_key: 'nobody' };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-// ==================================================================== config-auxiliary
+  // ==================================================================== config-auxiliary
 
-  getConfigValue( key: string ) { // config
-    if ( this.is_config_loaded() ) {
+  getConfigValue(key: string) {
+    // config
+    if (this.is_config_loaded()) {
       return this.sitebill_config[key];
     }
     return null;
   }
 
-  getDomConfigValue( key: string ) { // config
+  getDomConfigValue(key: string) {
+    // config
     return this.dom_sitebill_config[key];
   }
 
-  setDomConfigValue( key: string, value: any ) { // config
-    return this.dom_sitebill_config[key] = value;
+  setDomConfigValue(key: string, value: any) {
+    // config
+    return (this.dom_sitebill_config[key] = value);
   }
 
-
-  setConfigValue(key, value) { // config
+  setConfigValue(key, value) {
+    // config
     this.sitebill_config[key] = value;
   }
 
-// ===============================================================
+  // ===============================================================
 
   get_access(model_name, function_name) {
-    const storage = JSON.parse(this.storageService.getItem('currentUser')) || [];
+    const storage =
+      JSON.parse(this.storageService.getItem('currentUser')) || [];
     if (storage['structure'] == null) {
       return false;
     }
     if (storage['structure']['group_name'] === 'admin') {
       return true;
     }
-    if (storage['structure'][model_name] === null || storage['structure'][model_name] === undefined ) {
+    if (
+      storage['structure'][model_name] === null ||
+      storage['structure'][model_name] === undefined
+    ) {
       return false;
     }
-    if (storage['structure'][model_name][function_name]  === 1 ) {
+    if (storage['structure'][model_name][function_name] === 1) {
       return true;
     }
     return false;
   }
 
-  load_config() {  // config ?
+  load_config() {
+    // config ?
     // console.log(this.get_api_url());
     let body = {};
-    body = {action: 'model', do: 'load_config', anonymous: true, session_key: this.get_session_key_safe()};
+    body = {
+      action: 'model',
+      do: 'load_config',
+      anonymous: true,
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  load_config_anonymous() { // config ?
+  load_config_anonymous() {
+    // config ?
     // console.log(this.get_api_url());
     let body = {};
-    body = {action: 'model', do: 'load_config', anonymous: true, session_key: ''};
+    body = {
+      action: 'model',
+      do: 'load_config',
+      anonymous: true,
+      session_key: '',
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  system_config() { // config
+  system_config() {
+    // config
     let body = {};
-    body = {action: 'config', do: 'system_config', session_key: this.get_session_key_safe()};
+    body = {
+      action: 'config',
+      do: 'system_config',
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
   get_models_list() {
     let body = {};
-    body = {action: 'table', do: 'get_models_list', session_key: this.get_session_key_safe()};
+    body = {
+      action: 'table',
+      do: 'get_models_list',
+      session_key: this.get_session_key_safe(),
+    };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  update_system_config( ql_items: any ) { // config
+  update_system_config(ql_items: any) {
+    // config
     let body = {};
     body = {
       action: 'config',
       do: 'update',
       ql_items: ql_items,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  is_config_loaded() { // config
+  is_config_loaded() {
+    // config
     return this.config_loaded;
   }
 
-  init_config_standalone() { // config
+  init_config_standalone() {
+    // config
     console.log('start init config standalone');
     this.load_config_anonymous()
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe((result: any) => {
+      .subscribe(
+        (result: any) => {
           console.log('config standalone data loaded');
           if (result.state === 'success') {
             this.sitebill_config = result.data;
@@ -777,18 +959,19 @@ export class ModelService {
             console.log('load config failed');
           }
         },
-        error => {
+        (error) => {
           console.log('load config failed, bad request standalone');
-        });
-
+        }
+      );
   }
 
-
-  init_config() { // config
+  init_config() {
+    // config
     // console.log('start init config');
     this.load_config()
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe((result: any) => {
+      .subscribe(
+        (result: any) => {
           // console.log('config data loaded');
           if (result.state === 'success') {
             this.sitebill_config = result.data;
@@ -801,17 +984,18 @@ export class ModelService {
             }
           }
         },
-        error => {
+        (error) => {
           console.log('load config failed, bad request');
           this.config_loaded_emitter.emit(true);
-          if ( this.is_model_redirect_enabled() ) {
+          if (this.is_model_redirect_enabled()) {
             this.router.navigate(['grid/data']);
           }
-        });
-
+        }
+      );
   }
 
-  after_config_loaded() { // config
+  after_config_loaded() {
+    // config
     // console.log('after_config_loaded');
     this.config_loaded_emitter.emit(true);
     this.init_config_complete = true;
@@ -823,19 +1007,23 @@ export class ModelService {
       this.show_toolbar();
     }
 
-    if ( this.getConfigValue('apps.realty.default_frontend_route') === null || this.getConfigValue('apps.realty.default_frontend_route') === undefined) {
+    if (
+      this.getConfigValue('apps.realty.default_frontend_route') === null ||
+      this.getConfigValue('apps.realty.default_frontend_route') === undefined
+    ) {
       // console.log('default route');
-      if ( this.is_model_redirect_enabled() ) {
+      if (this.is_model_redirect_enabled()) {
         this.router.navigate(['grid/data']);
       }
     } else {
       // console.log('config route');
       // console.log(this.getConfigValue('apps.realty.default_frontend_route'));
-      if ( this.is_model_redirect_enabled() ) {
-        this.router.navigate([this.getConfigValue('apps.realty.default_frontend_route')]);
+      if (this.is_model_redirect_enabled()) {
+        this.router.navigate([
+          this.getConfigValue('apps.realty.default_frontend_route'),
+        ]);
       }
     }
-
   }
 
   load_current_user_profile() {
@@ -843,23 +1031,26 @@ export class ModelService {
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe((result: any) => {
         if (result.state === 'success') {
-          if ( result.data.group_id != null ) {
-            this.current_user_profile.group_id.value = result.data.group_id.value;
-            this.current_user_profile.group_id.value_string = result.data.group_id.value_string;
+          if (result.data.group_id != null) {
+            this.current_user_profile.group_id.value =
+              result.data.group_id.value;
+            this.current_user_profile.group_id.value_string =
+              result.data.group_id.value_string;
           }
 
-          if ( result.data.user_id != null ) {
+          if (result.data.user_id != null) {
             this.current_user_profile.user_id.value = result.data.user_id.value;
-            this.current_user_profile.user_id.value_string = result.data.user_id.value_string;
+            this.current_user_profile.user_id.value_string =
+              result.data.user_id.value_string;
           }
 
-          if ( result.data.fio != null ) {
+          if (result.data.fio != null) {
             this.current_user_profile.fio.value = result.data.fio.value;
           }
           if (result.data.email != null) {
             this.current_user_profile.email.value = result.data.email.value;
           }
-          if ( result.data.imgfile != null ) {
+          if (result.data.imgfile != null) {
             this.current_user_profile.imgfile.value = result.data.imgfile.value;
           }
           this.valid_user_emitter.emit(true);
@@ -874,43 +1065,63 @@ export class ModelService {
     const load_data_request = {
       action: 'oauth',
       do: 'load_my_profile',
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-  get_user_profile( user_id ) {
+  get_user_profile(user_id) {
     const load_data_request = {
       action: 'model',
       do: 'load_any_profile',
       user_id: user_id,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-  load_page( slug ) {
+  load_page(slug) {
     const load_data_request = {
       action: 'model',
       do: 'load_page',
       slug: slug,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
-
 
   get_current_user_profile() {
     return this.current_user_profile;
   }
   get_profile_img_url() {
-    if ( this.current_user_profile.imgfile.value != null && this.current_user_profile.imgfile.value !== '') {
-      return this.get_api_url(true) + '/img/data/user/' + this.current_user_profile.imgfile.value;
+    if (
+      this.current_user_profile.imgfile.value != null &&
+      this.current_user_profile.imgfile.value !== ''
+    ) {
+      return (
+        this.get_api_url(true) +
+        '/img/data/user/' +
+        this.current_user_profile.imgfile.value
+      );
     }
     return false;
   }
 
-  export_collections_pdf(domain, deal_id, report_type: string = 'client', memorylist_id = null) {
+  export_collections_pdf(
+    domain,
+    deal_id,
+    report_type: string = 'client',
+    memorylist_id = null
+  ) {
     const request = {
       action: 'pdfreport',
       do: 'export_collections_pdf',
@@ -918,9 +1129,11 @@ export class ModelService {
       memorylist_id: memorylist_id,
       domain: domain,
       report_type: report_type,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request, {responseType: 'blob'});
+    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request, {
+      responseType: 'blob',
+    });
   }
 
   excel_export(entity: SitebillEntity, input_params) {
@@ -929,13 +1142,14 @@ export class ModelService {
       do: 'export',
       model_name: entity.get_table_name(),
       input_params: input_params,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request, {responseType: 'blob'});
+    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request, {
+      responseType: 'blob',
+    });
   }
 
-
-  set_current_entity( entity: SitebillEntity ) {
+  set_current_entity(entity: SitebillEntity) {
     this.current_entity = entity;
   }
 
@@ -949,12 +1163,13 @@ export class ModelService {
     const request = {
       action: 'oauth',
       do: 'check_session_key',
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request)
+    this.http
+      .post(`${this.get_api_url()}/apps/api/rest.php`, request)
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe((result: any) => {
-        if ( result.success === 1 ) {
+        if (result.success === 1) {
           this.storageService.setItem('currentUser', JSON.stringify(result));
         }
         this.sitebill_loaded_complete_emitter.emit(true);
@@ -963,27 +1178,33 @@ export class ModelService {
       });
   }
 
-  show_navbar() { // ui
+  show_navbar() {
+    // ui
     this.navbar_hidden = false;
   }
 
-  hide_navbar() { // ui
+  hide_navbar() {
+    // ui
     this.navbar_hidden = true;
   }
 
-  is_navbar_hidden() { // ui
+  is_navbar_hidden() {
+    // ui
     return this.navbar_hidden;
   }
 
-  show_toolbar() { // ui
+  show_toolbar() {
+    // ui
     this.toolbar_hidden = false;
   }
 
-  hide_toolbar() { // ui
+  hide_toolbar() {
+    // ui
     this.toolbar_hidden = true;
   }
 
-  is_toolbar_hidden() { // ui
+  is_toolbar_hidden() {
+    // ui
     return this.toolbar_hidden;
   }
 
@@ -994,9 +1215,12 @@ export class ModelService {
       primary_key: 'id',
       do: 'get_contact',
       key_value: contact_id,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
-    return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
   get_parser_today_count() {
@@ -1005,13 +1229,15 @@ export class ModelService {
       model_name: 'data',
       primary_key: 'id',
       do: 'get_today_count',
-      session_key: 'nobody'
+      session_key: 'nobody',
     };
-    return this.http.post(`${this.get_parser_api_url()}/apps/api/rest.php`, load_data_request);
+    return this.http.post(
+      `${this.get_parser_api_url()}/apps/api/rest.php`,
+      load_data_request
+    );
   }
 
-
-  set_install_mode( mode: boolean ) {
+  set_install_mode(mode: boolean) {
     this.install_mode = mode;
   }
 
@@ -1029,7 +1255,13 @@ export class ModelService {
     return this.model_redirect;
   }
 
-  toggle( component, model_name, primary_key, primary_key_value, toggled_column_name ): Observable<any> {
+  toggle(
+    component,
+    model_name,
+    primary_key,
+    primary_key_value,
+    toggled_column_name
+  ): Observable<any> {
     const request = {
       action: component,
       do: 'toggle',
@@ -1037,13 +1269,13 @@ export class ModelService {
       primary_key: primary_key,
       primary_key_value: primary_key_value,
       toggled_column_name: toggled_column_name,
-      session_key: this.get_session_key_safe()
+      session_key: this.get_session_key_safe(),
     };
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, request);
   }
 
   OnDestroy() {
-    this._unsubscribeAll.next();
+    this._unsubscribeAll.next(null);
     this._unsubscribeAll.complete();
   }
 }

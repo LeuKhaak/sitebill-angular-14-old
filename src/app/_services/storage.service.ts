@@ -9,7 +9,7 @@ export class StorageService {
         // this.bitrix24Service.init_input_parameters();
     }
 
-    getItem (key: string) {
+    getItem (key: string): string {
         //return localStorage.getItem(key);
         //заглушка
         //console.log(this.bitrix24Service);
@@ -32,7 +32,9 @@ export class StorageService {
         //
         //     }
         // }
-        return localStorage.getItem(key);
+        const result = localStorage.getItem(key);
+        if (typeof result !== 'string') return '';
+        return result;
     }
 
     setItem (key: string, value: any) {
