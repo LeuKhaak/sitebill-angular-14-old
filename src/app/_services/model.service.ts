@@ -669,7 +669,12 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  native_update(model_name: string, key_value, ql_items, only_ql = null) {
+  native_update(
+    model_name: string,
+    key_value: string,
+    ql_items: { [index: string]: any },
+    only_ql = null
+  ) {
     const body = {
       action: 'model',
       do: 'native_update',
@@ -682,7 +687,11 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  update(model_name, key_value, ql_items) {
+  update(
+    model_name: string,
+    key_value: string,
+    ql_items: { [index: string]: any }
+  ) {
     const body = {
       action: 'model',
       do: 'graphql_update',
@@ -694,7 +703,11 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  update_only_ql(model_name, key_value, ql_items) {
+  update_only_ql(
+    model_name: string,
+    key_value: string,
+    ql_items: { [index: string]: any }
+  ) {
     const body = {
       action: 'model',
       do: 'graphql_update',
@@ -707,7 +720,12 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  update_column_meta(model_name, column_name, key, params) {
+  update_column_meta(
+    model_name: string,
+    column_name: string,
+    key: string,
+    params: { [index: string]: any }
+  ) {
     const body = {
       action: 'model',
       do: 'update_column_meta',
@@ -720,7 +738,7 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  delete(model_name, primary_key, key_value) {
+  delete(model_name: string, primary_key: string, key_value: string) {
     const body = {
       action: 'model',
       do: 'delete',
@@ -732,7 +750,12 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  report(model_name, primary_key, key_value, complaint_id) {
+  report(
+    model_name: string,
+    primary_key: string,
+    key_value: string,
+    complaint_id: string
+  ) {
     const body = {
       action: 'model',
       do: 'report',
@@ -745,7 +768,7 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  save_search(params, search_title) {
+  save_search(params: { [index: string]: any }, search_title: string) {
     const body = {
       action: 'mysearch',
       do: 'save',
@@ -756,7 +779,7 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  new_empty_record(model_name) {
+  new_empty_record(model_name: string) {
     const body = {
       action: 'model',
       do: 'new_empty_record',
@@ -777,7 +800,7 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  format_grid(entity: SitebillEntity, grid_items: string[], per_page) {
+  format_grid(entity: SitebillEntity, grid_items: string[], per_page: number) {
     let body = {};
     body = {
       action: 'model',
@@ -790,7 +813,12 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  uppend_uploads(model_name, key_name, key_value, field_name) {
+  uppend_uploads(
+    model_name: string,
+    key_name: string,
+    key_value: string,
+    field_name: string
+  ) {
     let body = {};
     body = {
       action: 'model',
@@ -804,7 +832,13 @@ export class ModelService {
     return this.http.post(`${this.get_api_url()}/apps/api/rest.php`, body);
   }
 
-  toggle_collections(domain, deal_id, title, data_id, memorylist_id = 0) {
+  toggle_collections(
+    domain: string,
+    deal_id: string,
+    title: string,
+    data_id: string,
+    memorylist_id = 0
+  ) {
     let body = {};
     body = {
       action: 'memorylist',
@@ -851,14 +885,14 @@ export class ModelService {
     return (this.dom_sitebill_config[key] = value);
   }
 
-  setConfigValue(key, value) {
+  setConfigValue(key: string, value: string) {
     // config
     this.sitebill_config[key] = value;
   }
 
   // ===============================================================
 
-  get_access(model_name, function_name) {
+  get_access(model_name: string, function_name: string) {
     const storage =
       JSON.parse(this.storageService.getItem('currentUser')) || [];
     if (storage['structure'] == null) {
@@ -1073,7 +1107,7 @@ export class ModelService {
     );
   }
 
-  get_user_profile(user_id) {
+  get_user_profile(user_id: string) {
     const load_data_request = {
       action: 'model',
       do: 'load_any_profile',
@@ -1086,7 +1120,7 @@ export class ModelService {
     );
   }
 
-  load_page(slug) {
+  load_page(slug: string) {
     const load_data_request = {
       action: 'model',
       do: 'load_page',
@@ -1117,8 +1151,8 @@ export class ModelService {
   }
 
   export_collections_pdf(
-    domain,
-    deal_id,
+    domain: string,
+    deal_id: number,
     report_type: string = 'client',
     memorylist_id = null
   ) {
@@ -1136,7 +1170,7 @@ export class ModelService {
     });
   }
 
-  excel_export(entity: SitebillEntity, input_params) {
+  excel_export(entity: SitebillEntity, input_params: { [index: string]: any }) {
     const request = {
       action: 'excelfree',
       do: 'export',
@@ -1256,11 +1290,11 @@ export class ModelService {
   }
 
   toggle(
-    component,
-    model_name,
-    primary_key,
-    primary_key_value,
-    toggled_column_name
+    component: string,
+    model_name: string,
+    primary_key: string,
+    primary_key_value: string,
+    toggled_column_name: string
   ): Observable<any> {
     const request = {
       action: component,
