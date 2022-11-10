@@ -1,9 +1,9 @@
-export interface CurrentUser {
-  admin_panel_login: number;
-  session_key: string;
-  success: number;
-  user_id: number;
-  profile: UserProfile;
+export class CurrentUser {
+  admin_panel_login = 0;
+  session_key = '';
+  success = 0;
+  user_id = -1;
+  profile = new UserProfile();
 }
 
 export class UserProfile {

@@ -181,7 +181,7 @@ export class FilterService {
 
   get_params_count_array() {
     const params = this.storageService.getItem('sitebill_params_count_' + this.get_postfix());
-    if (typeof params !== 'string') return;
+    // if (typeof params !== 'string') return;
     const params_count_array = JSON.parse(params);
     if (params_count_array !== null) {
       return params_count_array;
@@ -200,7 +200,7 @@ export class FilterService {
 
   get_postfix ( app_name = 'global_options' ) {
     const user = this.storageService.getItem('currentUser');
-    if (typeof user !== 'string') return;
+    // if (typeof user !== 'string') return;
     const currentUser = JSON.parse(user);
     let user_id = 0;
     if ( currentUser !== null ) {
@@ -213,7 +213,7 @@ export class FilterService {
   get_share_array(app_name: string): any {
     const array_title = 'sitebill_share_array_' + this.get_postfix(app_name);
     const array = this.storageService.getItem(array_title)
-    if (typeof array !== 'string') return;
+    // if (typeof array !== 'string') return;
     const share_array_local = JSON.parse(array);
     try {
       return share_array_local;
@@ -258,7 +258,7 @@ export class FilterService {
   set_share_array(app_name: string, key: string, datas: any) {
     const array_title = 'sitebill_share_array_' + this.get_postfix(app_name);
     const array = this.storageService.getItem(array_title)
-    if (typeof array !== 'string') return;
+    // if (typeof array !== 'string') return;
 
     let share_array_local = JSON.parse(array);
     // console.log(share_array_local);
