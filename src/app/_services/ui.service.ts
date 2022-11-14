@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {FuseConfigService} from '../../@fuse/services/config.service';
+// import {FuseConfigService} from '../../@fuse/services/config.service';
 
 @Injectable()
 export class UiService {
@@ -7,24 +7,24 @@ export class UiService {
   private toolbarHidden = false;
 
   constructor(
-    protected _fuseConfigService: FuseConfigService,
+    // protected _fuseConfigService: FuseConfigService,
   ) { }
 
-  disable_menu(): void {
-    this._fuseConfigService.config = {
-      layout: {
-        navbar: {
-          hidden: true
-        },
-        toolbar: {
-          hidden: true
-        },
-        footer: {
-          hidden: true
-        }
-      }
-    };
-  }
+  // disable_menu(): void {
+  //   this._fuseConfigService.config = {
+  //     layout: {
+  //       navbar: {
+  //         hidden: true
+  //       },
+  //       toolbar: {
+  //         hidden: true
+  //       },
+  //       footer: {
+  //         hidden: true
+  //       }
+  //     }
+  //   };
+  // }
 
   show_navbar(): void {
     this.navbarHidden = false;

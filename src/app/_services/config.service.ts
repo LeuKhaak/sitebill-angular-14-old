@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { APP_CONFIG, AppConfig } from '../app.config.module';
-import { FuseConfigService } from '../../@fuse/services/config.service';
-import {GetApiUrlService} from './get-api-url.service';
+// import { FuseConfigService } from '../../@fuse/services/config.service';
+import {GetApiUrlService} from './_getapiurlservice/get-api-url.service';
 import {GetSessionKeyService} from './get-session-key.service';
 import {UiService} from './ui.service';
 import {Subject} from 'rxjs';
@@ -26,7 +26,7 @@ export class ConfigService {
     private router: Router,
     protected getApiUrlService: GetApiUrlService,
     protected getSessionKeyService: GetSessionKeyService,
-    protected _fuseConfigService: FuseConfigService,
+    // protected _fuseConfigService: FuseConfigService,
     protected uiService: UiService,
     @Inject(APP_CONFIG) private config: AppConfig
   ) {

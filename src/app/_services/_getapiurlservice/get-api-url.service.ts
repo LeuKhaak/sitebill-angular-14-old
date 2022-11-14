@@ -1,7 +1,7 @@
 import {Inject, Injectable, isDevMode } from '@angular/core';
-import {SitebillEntity} from '../_models/sitebillentity';
-import {APP_CONFIG, AppConfig} from '../app.config.module';
-import {StorageService} from './storage.service';
+import {SitebillEntity} from '../../_models/sitebillentity';
+import {APP_CONFIG, AppConfig} from '../../app.config.module';
+import {StorageService} from '../storage.service';
 
 @Injectable()
 export class GetApiUrlService {
@@ -25,6 +25,7 @@ export class GetApiUrlService {
   }
 
   get_api_url(ignoreEntityUrl = false): string {
+    return 'https://odessa.xmltest.sitebill.net'; // TMP
     if ( !ignoreEntityUrl ) {
       try {
         if (this.get_current_entity().get_app_url() != null) {

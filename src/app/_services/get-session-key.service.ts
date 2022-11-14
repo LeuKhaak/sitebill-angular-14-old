@@ -5,9 +5,9 @@ import {CurrentUser, UserProfile} from '../_models/currentuser';
 import {Subject, timer} from 'rxjs';
 import {Router} from '@angular/router';
 import {StorageService} from './storage.service';
-import {FuseConfigService} from '../../@fuse/services/config.service';
+// import {FuseConfigService} from '../../@fuse/services/config.service';
 import {SnackService} from './snack.service';
-import {GetApiUrlService} from './get-api-url.service';
+import {GetApiUrlService} from './_getapiurlservice/get-api-url.service';
 import {UiService} from './ui.service';
 
 @Injectable()
@@ -36,7 +36,7 @@ export class GetSessionKeyService {
     protected _snackService: SnackService,
     protected getApiUrlService: GetApiUrlService,
     protected uiService: UiService,
-    protected _fuseConfigService: FuseConfigService,
+    // protected _fuseConfigService: FuseConfigService,
   ) {
     this._unsubscribeAll = new Subject();
     this.currentUser = JSON.parse(this.storageService.getItem('currentUser')) || [];
@@ -45,6 +45,7 @@ export class GetSessionKeyService {
   }
 
   get_session_key_safe() {
+    return 'edc28d4aabbff8d7506b8bcf3d978c7f'; // TMP
     const sessionKey = this.get_session_key();
     if (!this.is_validated_session_key()) {
       this.validateKey(sessionKey)
@@ -77,6 +78,7 @@ export class GetSessionKeyService {
   }
 
   get_session_key() {
+    return 'edc28d4aabbff8d7506b8bcf3d978c7f'; // TMP
     try {
       if (this.getApiUrlService.get_current_entity().get_app_session_key() != '') {
         return this.getApiUrlService.get_current_entity().get_app_session_key();
@@ -217,7 +219,7 @@ export class GetSessionKeyService {
     const body = {action: 'oauth', do: 'logout', session_key: this.currentUser.session_key};
     const url = `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`;
 
-    this.uiService.disable_menu();
+    // this.uiService.disable_menu();
     this.reset_local_user_storage();
     this.disable_session_key_validity();
     this.currentUserProfile = new UserProfile();

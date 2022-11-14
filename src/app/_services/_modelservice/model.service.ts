@@ -5,22 +5,22 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { APP_CONFIG, AppConfig } from '../app.config.module';
-import { UserProfile, CurrentUser } from '../_models/currentuser';
+import { APP_CONFIG, AppConfig } from '../../app.config.module';
+import { UserProfile, CurrentUser } from '../../_models/currentuser';
 import {
   ApiCall,
   SitebillEntity,
   SitebillModelItem,
-} from '../_models/sitebillentity';
+} from '../../_models/sitebillentity';
 import { Router } from '@angular/router';
-import { FuseConfigService } from '../../@fuse/services/config.service';
-import { FilterService } from './filter.service';
-import { StorageService } from './storage.service';
-import {ConfigService} from './config.service';
-import {GetApiUrlService} from './get-api-url.service';
-import {GetSessionKeyService} from './get-session-key.service';
+// import { FuseConfigService } from '../../../@fuse/services/config.service';
+import { FilterService } from '../filter.service';
+import { StorageService } from '../storage.service';
+import {ConfigService} from '../config.service';
+import {GetApiUrlService} from '../_getapiurlservice/get-api-url.service';
+import {GetSessionKeyService} from '../get-session-key.service';
 import { Observable, Subject, timer } from 'rxjs';
-import { SitebillSession } from '../_models/sitebillsession';
+import { SitebillSession } from '../../_models/sitebillsession';
 import { takeUntil } from 'rxjs/operators';
 
 @Injectable()
@@ -50,7 +50,7 @@ export class ModelService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    protected _fuseConfigService: FuseConfigService,
+    // protected _fuseConfigService: FuseConfigService,
     public storageService: StorageService,
     private filterService: FilterService,
     protected getApiUrlService: GetApiUrlService,
@@ -133,7 +133,7 @@ export class ModelService {
       page: page,
       per_page: per_page,
       params: filter_params_json,
-      session_key: this.getSessionKeyService.get_session_key_safe(),
+      session_key:  this.getSessionKeyService.get_session_key_safe(),
       grid_item: grid_item,
     };
     // console.log(body);

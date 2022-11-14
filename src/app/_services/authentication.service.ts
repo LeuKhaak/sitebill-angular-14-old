@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators';
 import {CurrentUser} from '../_models/currentuser';
 import { APP_CONFIG, AppConfig } from '../app.config.module';
-import { ModelService } from './model.service';
+import { ModelService } from './_modelservice/model.service';
 import 'rxjs-compat/add/observable/of';
 import 'rxjs-compat/add/observable/empty';
 import {throwError} from 'rxjs';

@@ -2,7 +2,6 @@ import { Injectable, Output, EventEmitter } from '@angular/core';
 import { Subject } from 'rxjs';
 import { SitebillEntity} from '../_models/sitebillentity';
 import {StorageService} from "./storage.service";
-import any = jasmine.any;
 
 @Injectable()
 export class FilterIterator {
