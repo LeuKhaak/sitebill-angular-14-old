@@ -1,5 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+} from '@angular/core';
 import { ModelService } from '../../_services/_modelservice/model.service';
+import { FilterService } from 'src/app/_services/filter.service';
+import { ConfigService } from 'src/app/_services/config.service';
+import { GetSessionKeyService } from 'src/app/_services/get-session-key.service';
+import { StringParserService } from 'src/app/_services/string-parser.service';
+import { CommonTemplateComponent } from './common-template/common-template.component';
 import { Page } from './page';
 import {
   SitebillEntity,
@@ -16,21 +28,59 @@ import { Router } from '@angular/router';
 })
 export class GridComponent implements OnInit {
   rows_data = [];
+  grid_meta = [];
   page = new Page();
   entity: SitebillEntity;
   loadingIndicator = false;
+  error = false;
+  error_message = '';
+  columns_index = [];
+  rows_index = [];
+  data_all = -1;
+  refresh_complete = false;
+  loadGridComplete = false;
+  grid_columns_for_compose: string[] = [];
+  data_columns: any[] = [];
+  compose_complete = false;
+
+  private params_filter = '';
   protected _unsubscribeAll: Subject<any>;
   protected predefined_grid_fields = [];
   protected predefined_grid_params: { [index: string]: any } | null = {};
 
-  constructor(public modelService: ModelService, private router: Router) {
+  @ViewChild(CommonTemplateComponent)
+  public commonTemplate: CommonTemplateComponent;
+
+  @Input('freeze_default_columns_list')
+  freeze_default_columns_list = false;
+
+  @Input('enable_collections')
+  enable_collections = false;
+
+  @Input('only_collections')
+  only_collections = false;
+
+  @Input('memorylist_id')
+  memorylist_id = -1;
+
+  @Input('enable_select_rows')
+  enable_select_rows = true;
+
+  @Output() total_counterEvent = new EventEmitter<number>();
+
+  constructor(
+    public modelService: ModelService,
+    private router: Router,
+    public filterService: FilterService,
+    public configService: ConfigService,
+    public getSessionKeyService: GetSessionKeyService,
+    protected stringParserService: StringParserService
+  ) {
     this._unsubscribeAll = new Subject();
     this.entity = new SitebillEntity();
   }
 
-  ngOnInit(): void {
-    // this.load_grid_data();
-  }
+  ngOnInit(): void {}
 
   refresh() {
     this.modelService.set_current_entity(this.entity);
@@ -59,41 +109,28 @@ export class GridComponent implements OnInit {
   init_grid(params: { [index: string]: any } | null) {
     let predefined_grid_fields = this.get_predefined_grid_fiels();
     if (predefined_grid_fields != null) {
-      this.load_grid_data(
-        this.entity.get_app_name(),
-        predefined_grid_fields,
-        params
-      );
+      this.load_grid_data(predefined_grid_fields, params);
     } else {
       this.modelService
         .load_grid_columns(this.entity)
         .pipe(takeUntil(this._unsubscribeAll))
-        .subscribe(
-          (result: any) => {
-            if (
-              result.state == 'error' &&
-              result.error == 'check_session_key_failed'
-            ) {
+        .subscribe({
+          next: (v: any) => {
+            if (v.state == 'error' && v.error == 'check_session_key_failed') {
               this.router.navigate(['/login']);
-              return false;
             }
-            if (result.data['meta'] != null) {
-              if (result.data['meta']['per_page'] != null) {
-                this.page.size = result.data['meta']['per_page'];
+            if (v.data['meta'] != null) {
+              if (v.data['meta']['per_page'] != null) {
+                this.page.size = v.data['meta']['per_page'];
               }
             }
-            this.load_grid_data(
-              this.entity.get_app_name(),
-              result.data['grid_fields'],
-              params
-            );
+            this.load_grid_data(v.data['grid_fields'], params);
           },
-          (err) => {
-            console.log(err);
+          error: (e) => {
+            console.log(e);
             this.router.navigate(['/login']);
-            return false;
-          }
-        );
+          },
+        });
     }
   }
 
@@ -101,10 +138,10 @@ export class GridComponent implements OnInit {
     if (this.predefined_grid_fields.length > 0) {
       return this.predefined_grid_fields;
     }
-    return null;
+    return [];
   }
 
-  load_grid_data(grid_columns: string, params: any) {
+  load_grid_data(grid_columns: string[], params: any) {
     let filter_params_json = this.get_filter_params();
 
     if (params != null) {
@@ -159,7 +196,9 @@ export class GridComponent implements OnInit {
 
           this.grid_meta = result_f1.grid_columns.meta;
           let model_compose = this.entity.model;
-          this.compose_columns(this.grid_columns_for_compose, model_compose);
+          if (this.grid_columns_for_compose.length) {
+            this.compose_columns(this.grid_columns_for_compose, model_compose);
+          }
           this.rows_data = result_f1.rows;
           this.data_all = result_f1.rows.length;
         }
@@ -167,8 +206,17 @@ export class GridComponent implements OnInit {
       });
   }
 
+  rise_error(message: string) {
+    this.error = true;
+    this.error_message = message;
+  }
+
+  set_total_counter(counter: number) {
+    this.total_counterEvent.next(counter);
+  }
+
   get_filter_params() {
-    let filter_params_json = {};
+    let filter_params_json: { [index: string]: any } = {};
     let concatenate_search_string = null;
 
     if (this.filterService.get_params_count(this.entity.get_app_name()) > 0) {
@@ -178,7 +226,7 @@ export class GridComponent implements OnInit {
 
       mapped.forEach(function (item, i, arr) {
         if (
-          self.modelService.getConfigValue(
+          self.configService.getConfigValue(
             'apps.realty.search_string_parser.enable'
           ) === '1' &&
           item === 'concatenate_search' &&
@@ -199,13 +247,14 @@ export class GridComponent implements OnInit {
 
     if (this.enable_collections) {
       filter_params_json['load_collections'] = true;
-      filter_params_json['collections_domain'] =
-        this.bitrix24Service.get_domain();
-      filter_params_json['collections_deal_id'] =
-        this.bitrix24Service.get_entity_id();
+      // !!! bitrix24
+      // filter_params_json['collections_domain'] =
+      //  this.bitrix24Service.get_domain();
+      // filter_params_json['collections_deal_id'] =
+      //  this.bitrix24Service.get_entity_id();
       if (this.only_collections) {
         filter_params_json['only_collections'] = true;
-        if (this.memorylist_id) {
+        if (this.memorylist_id !== -1) {
           filter_params_json['memorylist_id'] = this.memorylist_id;
         }
       }
@@ -214,31 +263,145 @@ export class GridComponent implements OnInit {
     if (concatenate_search_string !== null) {
       filter_params_json = {
         ...filter_params_json,
-        ...self.parse_params_from_string(concatenate_search_string),
+        ...this.parse_params_from_string(concatenate_search_string),
       };
     }
     return filter_params_json;
   }
 
-  //load_grid_data() {
-  //  // TMP
-  //  this.modelService
-  //    .load(
-  //      'data',
-  //      '',
-  //      {
-  //        load_collections: true,
-  //        collections_domain: 'localhost',
-  //        collections_deal_id: 1,
-  //      },
-  //      '',
-  //      1,
-  //      21
-  //    )
-  //    .pipe(takeUntil(this._unsubscribeAll))
-  //    .subscribe((result_f1: any) => {
-  //      this.rows_data = result_f1.rows;
-  //      console.log(this.rows_data);
-  //    });
-  //}
+  extended_params(params: { [index: string]: any }) {
+    if (this.params_filter === 'my') {
+      params['user_id'] = this.getSessionKeyService.get_user_id();
+    }
+    return params;
+  }
+
+  parse_params_from_string(input: string) {
+    const parser_result = this.stringParserService.parse(input);
+    return parser_result.params;
+  }
+
+  compose_columns(columns_list: string[], model: SitebillModelItem[]) {
+    // delete this.data_columns;
+    this.data_columns = [];
+    // проходим по columns_list
+    // для каждой вытягиваем из model информацию и добавляем в объект КОЛОНКИ
+    if (this.enable_select_rows) {
+      this.data_columns = [
+        {
+          cellTemplate: this.commonTemplate.gridCheckboxTmpl,
+          headerTemplate: this.commonTemplate.gridCheckboxHdrTmpl,
+          width: 30,
+          type: 'primary_key',
+          resizeable: false,
+        },
+      ];
+    }
+
+    this.data_columns.push(this.get_control_column());
+
+    columns_list.forEach((row, index) => {
+      if (this.columns_index[row] == null) {
+        return;
+      }
+      this.entity.add_column(model[this.columns_index[row]].name);
+      let cellTemplate = null;
+      let prop = '';
+      let width = 150;
+      prop = model[this.columns_index[row]].name + '.value';
+      if (this.grid_meta != null) {
+        if (this.grid_meta['columns'] != null) {
+          if (
+            this.grid_meta['columns'][model[this.columns_index[row]].name] !=
+            null
+          ) {
+            width =
+              this.grid_meta['columns'][model[this.columns_index[row]].name]
+                .width;
+          }
+        }
+      }
+
+      switch (model[this.columns_index[row]].type) {
+        case 'safe_string':
+          if (this.isMessengerEnabled(model[this.columns_index[row]])) {
+            cellTemplate = this.commonTemplate.whatsAppTmpl;
+          }
+          break;
+
+        case 'textarea':
+        case 'textarea_editor':
+          cellTemplate = this.commonTemplate.textTmpl;
+          break;
+
+        case 'dttime':
+          cellTemplate = this.commonTemplate.dttimeTmpl;
+          break;
+
+        case 'dtdatetime':
+          cellTemplate = this.commonTemplate.dtdatetimeTmpl;
+          break;
+
+        case 'dtdate':
+          cellTemplate = this.commonTemplate.dtdateTmpl;
+          break;
+
+        case 'injector':
+          cellTemplate = this.commonTemplate.injectorTmpl;
+          break;
+
+        case 'geodata':
+          cellTemplate = this.commonTemplate.geoTmpl;
+          prop = model[this.columns_index[row]].name + '.value_string';
+          break;
+
+        case 'checkbox':
+          cellTemplate = this.commonTemplate.checkboxTmpl;
+          break;
+
+        case 'photo':
+          cellTemplate = this.commonTemplate.photoTmpl;
+          break;
+
+        case 'price':
+          cellTemplate = this.commonTemplate.priceTmpl;
+          break;
+
+        case 'uploads':
+          cellTemplate = this.commonTemplate.imageTmpl;
+          break;
+
+        case 'select_by_query_multi':
+          cellTemplate = this.commonTemplate.select_by_query_multi_Tmpl;
+          break;
+
+        default:
+          if (this.isMessengerEnabled(model[this.columns_index[row]])) {
+            cellTemplate = this.commonTemplate.whatsAppTmpl;
+          } else {
+            cellTemplate = null;
+          }
+          prop = model[this.columns_index[row]].name + '.value_string';
+      }
+
+      let column = {
+        headerTemplate: this.get_header_template(),
+        cellTemplate: cellTemplate,
+        type: model[this.columns_index[row]].type,
+        ngx_name: model[this.columns_index[row]].name + '.title',
+        model_name: model[this.columns_index[row]].name,
+        title: model[this.columns_index[row]].title,
+        width: width,
+        prop: prop,
+      };
+      this.data_columns.push(column);
+    });
+    this.after_compose();
+    console.log(this.data_columns);
+  }
+
+  after_compose() {
+    this.compose_complete = true;
+    this.loadingIndicator = false;
+  }
 }

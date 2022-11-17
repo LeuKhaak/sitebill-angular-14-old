@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  Output,
-  EventEmitter,
-} from '@angular/core';
+import { Injectable, Inject, Output, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { APP_CONFIG, AppConfig } from '../../app.config.module';
 import { UserProfile, CurrentUser } from '../../_models/currentuser';
@@ -16,9 +11,9 @@ import { Router } from '@angular/router';
 // import { FuseConfigService } from '../../../@fuse/services/config.service';
 import { FilterService } from '../filter.service';
 import { StorageService } from '../storage.service';
-import {ConfigService} from '../config.service';
-import {GetApiUrlService} from '../_getapiurlservice/get-api-url.service';
-import {GetSessionKeyService} from '../get-session-key.service';
+import { ConfigService } from '../config.service';
+import { GetApiUrlService } from '../_getapiurlservice/get-api-url.service';
+import { GetSessionKeyService } from '../get-session-key.service';
 import { Observable, Subject, timer } from 'rxjs';
 import { SitebillSession } from '../../_models/sitebillsession';
 import { takeUntil } from 'rxjs/operators';
@@ -99,7 +94,8 @@ export class ModelService {
   }
 
   final_state() {
-    if (this.init_config_complete && this.init_permissions_complete) { // config
+    if (this.init_config_complete && this.init_permissions_complete) {
+      // config
       console.log('final_state true');
       return true;
     }
@@ -119,7 +115,7 @@ export class ModelService {
 
   load(
     model_name: string,
-    grid_item: string,
+    grid_item: string[],
     filter_params_json: { [index: string]: any },
     owner: string,
     page: number,
@@ -133,11 +129,14 @@ export class ModelService {
       page: page,
       per_page: per_page,
       params: filter_params_json,
-      session_key:  this.getSessionKeyService.get_session_key_safe(),
+      session_key: this.getSessionKeyService.get_session_key_safe(),
       grid_item: grid_item,
     };
     // console.log(body);
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   // Возвращаем только записи, которые используются в связанной таблице
@@ -149,7 +148,10 @@ export class ModelService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   // Возвращаем только записи, которые используются в связанной таблице
@@ -163,7 +165,10 @@ export class ModelService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   load_dictionary_model_with_params(
@@ -182,7 +187,10 @@ export class ModelService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   api_call(api_call: ApiCall, standard_params = {}) {
@@ -195,7 +203,10 @@ export class ModelService {
     };
     request = { ...request, ...standard_params };
     console.log(request);
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
   async api_call_async(api_call: ApiCall, standard_params = {}) {
     return new Promise((resolve, reject) => {
@@ -214,7 +225,10 @@ export class ModelService {
   }
 
   api_request(request: any) {
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   // Возвращает все записи
@@ -228,7 +242,10 @@ export class ModelService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   get_max(model_name: string, columnName: string) {
@@ -240,7 +257,10 @@ export class ModelService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   load_only_model(model_name: string, anonymous = false) {
@@ -315,7 +335,10 @@ export class ModelService {
       only_ql: only_ql,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   native_update(
@@ -333,7 +356,10 @@ export class ModelService {
       only_ql: only_ql,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   update(
@@ -349,7 +375,10 @@ export class ModelService {
       ql_items: ql_items,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   update_only_ql(
@@ -366,7 +395,10 @@ export class ModelService {
       ql_items: ql_items,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   update_column_meta(
@@ -384,7 +416,10 @@ export class ModelService {
       params: params,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   delete(model_name: string, primary_key: string, key_value: string) {
@@ -396,7 +431,10 @@ export class ModelService {
       primary_key: primary_key,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   report(
@@ -414,7 +452,10 @@ export class ModelService {
       complaint_id: complaint_id,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   save_search(params: { [index: string]: any }, search_title: string) {
@@ -425,7 +466,10 @@ export class ModelService {
       search_title: search_title,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   new_empty_record(model_name: string) {
@@ -435,7 +479,10 @@ export class ModelService {
       model_name: model_name,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   load_grid_columns(entity: SitebillEntity) {
@@ -446,7 +493,10 @@ export class ModelService {
       model_name: entity.get_table_name(),
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   format_grid(entity: SitebillEntity, grid_items: string[], per_page: number) {
@@ -459,7 +509,10 @@ export class ModelService {
       per_page: per_page,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   uppend_uploads(
@@ -478,7 +531,10 @@ export class ModelService {
       image_field: field_name,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   toggle_collections(
@@ -499,12 +555,16 @@ export class ModelService {
       data_id: data_id,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   get_access(model_name: string, function_name: string) {
     const storage =
-      JSON.parse(this.storageService.getItem('currentUser')) || new CurrentUser();
+      JSON.parse(this.storageService.getItem('currentUser')) ||
+      new CurrentUser();
     if (storage['structure'] == null) {
       return false;
     }
@@ -530,7 +590,10 @@ export class ModelService {
       do: 'get_models_list',
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   get_user_profile(user_id: string) {
@@ -591,9 +654,13 @@ export class ModelService {
       report_type: report_type,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request, {
-      responseType: 'blob',
-    });
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request,
+      {
+        responseType: 'blob',
+      }
+    );
   }
 
   excel_export(entity: SitebillEntity, input_params: { [index: string]: any }) {
@@ -604,9 +671,13 @@ export class ModelService {
       input_params: input_params,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request, {
-      responseType: 'blob',
-    });
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request,
+      {
+        responseType: 'blob',
+      }
+    );
   }
 
   set_current_entity(entity: SitebillEntity) {
@@ -685,7 +756,10 @@ export class ModelService {
       toggled_column_name: toggled_column_name,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, request);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      request
+    );
   }
 
   OnDestroy() {
