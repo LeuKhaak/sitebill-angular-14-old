@@ -37,8 +37,6 @@ export class AuthenticationService {
 
     const body = { login: username, password: password };
     //console.log(body);
-    //return this.http.post<any>('/apps/api/rest.php', {login: username, password: password})
-    //const url = `${this.api_url}/apps/apiproxy/restproxy.php`;
     const url = `${this.api_url}/apps/api/rest.php`;
 
     const login_request = {
@@ -72,7 +70,7 @@ export class AuthenticationService {
         return user;
       }),
       catchError((e) => {
-        return throwError('site error');
+        return throwError(() => e);
       })
     );
   }
@@ -103,7 +101,7 @@ export class AuthenticationService {
         return user;
       }),
       catchError((e) => {
-        return throwError('site error');
+        return throwError(() => e);
       })
     );
   }
@@ -123,7 +121,7 @@ export class AuthenticationService {
         return user;
       }),
       catchError((e) => {
-        return throwError('site error');
+        return throwError(() => e);
       })
     );
   }
@@ -143,7 +141,7 @@ export class AuthenticationService {
         return user;
       }),
       catchError((e) => {
-        return throwError('site error');
+        return throwError(() => e);
       })
     );
   }

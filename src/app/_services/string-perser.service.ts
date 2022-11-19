@@ -9,14 +9,10 @@ export class StringParserService {
 
     let found: { [index: string]: any } = {};
 
-    let anymatch = false;
-
     while (search.length > 0) {
       //console.log('строка: '+search);
-      //console.log('строка: '+search);
-      var match = null;
-      //anymatch = false;
-      for (var i in svariants) {
+      let match = null;
+      for (let i in svariants) {
         if (svariants[i]._isMatch(search)) {
           found[svariants[i].varname] = svariants[i]._getValue();
           match = svariants[i]._match;
@@ -36,12 +32,9 @@ export class StringParserService {
 
     let s = [];
 
-    let params_return = {
-      //price_min: 1000000,
-      //price_max: 2000000,
-    };
+    let params_return = {};
 
-    for (var srtype in found) {
+    for (let srtype in found) {
       if (srtype == 'area') {
         if (found[srtype].length == 1) {
           s.push('Площадь, м: от ' + found[srtype][0]);
@@ -118,29 +111,29 @@ export class StringParserService {
   }
 
   getVariants() {
-    let svariants = [
+    let svariants: any[] = [
       {
-        value: [],
+        valueArray: [],
         type: 'karea',
         pattern: /^(?:кух|кухн|кухня|кухни)\s*(\d{1,3})/,
         varname: 'kitchen',
         _match: '',
-        _isMatchSuccess: function (match) {
-          var value = parseInt(match[1]);
+        _isMatchSuccess: function (match: string[]) {
+          let value = parseInt(match[1]);
           return value >= 3 && value <= 100;
         },
-        _setValue: function (match) {
-          var value = parseInt(match[1]);
+        _setValue: function (match: string[]) {
+          let value = parseInt(match[1]);
           if (value >= 3 && value <= 100) {
-            this.value.push(value);
+            this.valueArray.push(value);
           }
         },
         _getValue: function () {
-          return this.value;
+          return this.valueArray;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           //console.log(match);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
@@ -156,13 +149,13 @@ export class StringParserService {
         pattern: /^(\d*)-(\d*)(\s?)этаж/,
         varname: 'floor',
         _match: '',
-        _isMatchSuccess: function (match) {
+        _isMatchSuccess: function () {
           return true;
         },
-        _setValue: function (match) {
+        _setValue: function (match: string[]) {
           if (!isNaN(parseInt(match[1])) && !isNaN(parseInt(match[2]))) {
-            var minval = Math.min(parseInt(match[1]), parseInt(match[2]));
-            var maxval = Math.max(parseInt(match[1]), parseInt(match[2]));
+            let minval = Math.min(parseInt(match[1]), parseInt(match[2]));
+            let maxval = Math.max(parseInt(match[1]), parseInt(match[2]));
 
             if (this.value.min > minval) {
               this.value.min = minval;
@@ -171,34 +164,23 @@ export class StringParserService {
               this.value.max = maxval;
             }
           } else if (!isNaN(parseInt(match[1]))) {
-            var minval = parseInt(match[1]);
+            let minval = parseInt(match[1]);
             if (this.value.min > minval) {
               this.value.min = minval;
             }
           } else if (!isNaN(parseInt(match[2]))) {
-            var maxval = parseInt(match[2]);
+            let maxval = parseInt(match[2]);
             if (this.value.max < maxval) {
               this.value.max = maxval;
             }
           }
-          /*
-                    if(!isNaN(parseInt(match[1]))){
-                        this.value.push(parseInt(match[1]));
-                    }else{
-                        this.value.push(0);
-                    }
-                    if(!isNaN(parseInt(match[2]))){
-                        this.value.push(parseInt(match[2]));
-                    }else{
-                        this.value.push(0);
-                    }*/
         },
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
 
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
@@ -214,18 +196,18 @@ export class StringParserService {
         pattern: /^[№#](\d+)/,
         varname: 'id',
         _match: '',
-        _isMatchSuccess: function (match) {
+        _isMatchSuccess: function () {
           return true;
         },
-        _setValue: function (match) {
+        _setValue: function (match: string[]) {
           this.value.push(parseInt(match[1]));
         },
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
             this._match = match[0];
@@ -240,10 +222,10 @@ export class StringParserService {
         _match: '',
         pattern: /^(\-)?(\d+[.,]?\d*)(\-)?[мm](\-)?/,
         varname: 'cheight',
-        _isMatchSuccess: function (match) {
+        _isMatchSuccess: function () {
           return true;
         },
-        _setValue: function (match) {
+        _setValue: function (match: string[]) {
           if (match[1]) {
             this.value.push(0);
             this.value.push(match[2]);
@@ -256,9 +238,9 @@ export class StringParserService {
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
             this._match = match[0];
@@ -273,19 +255,19 @@ export class StringParserService {
         _match: '',
         pattern: /^(\d{1,3})(?:\s|$)/,
         varname: 'area',
-        _isMatchSuccess: function (match) {
-          var value = parseInt(match[1]);
+        _isMatchSuccess: function (match: string[]) {
+          let value = parseInt(match[1]);
           return value >= 9 && value <= 199;
         },
-        _setValue: function (match) {
+        _setValue: function (match: string[]) {
           this.value.push(match[1]);
         },
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
             this._match = match[0];
@@ -300,13 +282,13 @@ export class StringParserService {
         _match: '',
         pattern: /^(\d{3,})(?:\s|$)/,
         varname: 'price',
-        _isMatchSuccess: function (match) {
+        _isMatchSuccess: function (match: string[]) {
           // console.log('----');
-          var value = parseInt(match[1]);
+          let value = parseInt(match[1]);
           return value >= 200;
         },
-        _setValue: function (match) {
-          var value = parseInt(match[1]);
+        _setValue: function (match: string[]) {
+          let value = parseInt(match[1]);
           if (value >= 200 && value < 200000) {
             this.value.push(value * 1000);
           } else if (value >= 200000) {
@@ -316,9 +298,9 @@ export class StringParserService {
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
             this._match = match[0];
@@ -333,13 +315,13 @@ export class StringParserService {
         _match: '',
         pattern: /^(\d{1}|ст(?=[^а-яА-ЯёЁa-zA-Z0-9])(?:\s|$))/,
         varname: 'rooms',
-        _isMatchSuccess: function (match) {
+        _isMatchSuccess: function (match: string[]) {
           //console.log(match);
           if (match[1].trim() == 'ст') return true;
-          var value = parseInt(match[1]);
+          let value = parseInt(match[1]);
           return value >= 1 && value <= 8;
         },
-        _setValue: function (match) {
+        _setValue: function (match: string[]) {
           if (match[1].trim() == 'ст') this.value.push(match[1]);
           if (!isNaN(parseInt(match[1]))) {
             this.value.push(parseInt(match[1]));
@@ -348,9 +330,9 @@ export class StringParserService {
         _getValue: function () {
           return this.value;
         },
-        _isMatch: function (search) {
+        _isMatch: function (search: string) {
           let k = new RegExp(this.pattern);
-          var match = k.exec(search);
+          let match = k.exec(search);
           if (match && this._isMatchSuccess(match)) {
             this._setValue(match);
             this._match = match[0];

@@ -1,14 +1,14 @@
-import {EventEmitter, Inject, Injectable, Output} from '@angular/core';
+import { EventEmitter, Inject, Injectable, Output } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { APP_CONFIG, AppConfig } from '../app.config.module';
 // import { FuseConfigService } from '../../@fuse/services/config.service';
-import {GetApiUrlService} from './_getapiurlservice/get-api-url.service';
-import {GetSessionKeyService} from './get-session-key.service';
-import {UiService} from './ui.service';
-import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import { GetApiUrlService } from './_getapiurlservice/get-api-url.service';
+import { GetSessionKeyService } from './get-session-key.service';
+import { UiService } from './ui.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Injectable()
 export class ConfigService {
@@ -35,19 +35,20 @@ export class ConfigService {
     this.dom_sitebill_config = {};
   }
 
-  // is_config_loaded()
-  // init_config_standalone()
-  // init_config()
-  // after_config_loaded()
-
   system_config() {
     let body = {};
-    body = {action: 'config', do: 'system_config', session_key: this.getSessionKeyService.get_session_key_safe()};
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    body = {
+      action: 'config',
+      do: 'system_config',
+      session_key: this.getSessionKeyService.get_session_key_safe(),
+    };
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   getConfigValue(key: string) {
-    // config
     if (this.is_config_loaded()) {
       return this.sitebill_config[key];
     }
@@ -55,22 +56,18 @@ export class ConfigService {
   }
 
   getDomConfigValue(key: string) {
-    // config
     return this.dom_sitebill_config[key];
   }
 
   setDomConfigValue(key: string, value: any) {
-    // config
     return (this.dom_sitebill_config[key] = value);
   }
 
   setConfigValue(key: string, value: string) {
-    // config
     this.sitebill_config[key] = value;
   }
 
   load_config() {
-    // config ?
     // console.log(this.get_api_url());
     let body = {};
     body = {
@@ -79,11 +76,13 @@ export class ConfigService {
       anonymous: true,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   load_config_anonymous() {
-    // config ?
     // console.log(this.get_api_url());
     let body = {};
     body = {
@@ -92,11 +91,13 @@ export class ConfigService {
       anonymous: true,
       session_key: '',
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   update_system_config(ql_items: any) {
-    // config
     let body = {};
     body = {
       action: 'config',
@@ -104,44 +105,45 @@ export class ConfigService {
       ql_items: ql_items,
       session_key: this.getSessionKeyService.get_session_key_safe(),
     };
-    return this.http.post(`${this.getApiUrlService.get_api_url()}/apps/api/rest.php`, body);
+    return this.http.post(
+      `${this.getApiUrlService.get_api_url()}/apps/api/rest.php`,
+      body
+    );
   }
 
   is_config_loaded() {
-    // config
     return this.config_loaded;
   }
 
   init_config_standalone() {
-    // config
     console.log('start init config standalone');
     this.load_config_anonymous()
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (v: any) => {
           console.log('config standalone data loaded');
-          if (result.state === 'success') {
-            this.sitebill_config = result.data;
+          if (v.state === 'success') {
+            this.sitebill_config = v.data;
             this.config_loaded = true;
             this.config_loaded_emitter.emit(true);
           } else {
             console.log('load config failed');
           }
         },
-        (error) => {
+        error: (e) => {
           console.log('load config failed, bad request standalone');
-        }
-      );
+        },
+      });
   }
 
   init_config() {
     this.load_config()
       .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe(
-        (result: any) => {
+      .subscribe({
+        next: (v: any) => {
           // console.log('config data loaded');
-          if (result.state === 'success') {
-            this.sitebill_config = result.data;
+          if (v.state === 'success') {
+            this.sitebill_config = v.data;
             this.config_loaded = true;
             this.after_config_loaded();
           } else {
@@ -151,14 +153,14 @@ export class ConfigService {
             }
           }
         },
-        (error) => {
+        error: (e) => {
           console.log('load config failed, bad request');
           this.config_loaded_emitter.emit(true);
           if (this.getSessionKeyService.is_model_redirect_enabled()) {
             this.router.navigate(['grid/data']);
           }
-        }
-      );
+        },
+      });
   }
 
   after_config_loaded() {
