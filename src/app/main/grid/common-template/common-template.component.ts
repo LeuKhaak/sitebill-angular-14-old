@@ -11,10 +11,12 @@ import { SitebillEntity } from 'src/app/_models/sitebillentity';
 import { AppConfig, APP_CONFIG } from 'src/app/app.config.module';
 import { ModelService } from 'src/app/_services/_modelservice/model.service';
 import { GetApiUrlService } from 'src/app/_services/_getapiurlservice/get-api-url.service';
+import {ConfigService} from '../../../_services/config.service';
 // import {WhatsAppService} from "../../apps/whatsapp/whatsapp.service"; // TMP
 import { takeUntil } from 'rxjs/operators';
 import { SitebillResponse } from '../../../_models/sitebill-response';
 import { Subject } from 'rxjs';
+
 
 interface WhatsAppCheckStorage {
   [key: string]: any;
@@ -105,9 +107,10 @@ export class CommonTemplateComponent {
   private whatsAppCheckStorage: WhatsAppCheckStorage = {};
 
   constructor(
-    @Inject(APP_CONFIG) private config: AppConfig,
+    // @Inject(APP_CONFIG) private config: AppConfig, // TMP
     public modelService: ModelService,
-    protected getApiUrlService: GetApiUrlService // protected whatsAppService: WhatsAppService, // TMP
+    protected getApiUrlService: GetApiUrlService, // protected whatsAppService: WhatsAppService, // TMP
+    protected configService: ConfigService,
   ) {
     this._unsubscribeAll = new Subject();
   }

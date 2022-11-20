@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
+// import { FlexLayoutModule } from '@angular/flex-layout'; // deprecated
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatOptionModule } from '@angular/material/core';
@@ -12,11 +12,11 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-import { FuseDirectivesModule } from '@fuse/directives/directives';
-import { FuseMaterialColorPickerModule } from '@fuse/components/material-color-picker/material-color-picker.module';
-import { FuseSidebarModule } from '@fuse/components/sidebar/sidebar.module';
+import { FuseDirectivesModule } from '../../directives/directives';
+import { FuseMaterialColorPickerModule } from '../material-color-picker/material-color-picker.module';
+import { FuseSidebarModule } from '../sidebar/sidebar.module';
 
-import { FuseThemeOptionsComponent } from '@fuse/components/theme-options/theme-options.component';
+import { FuseThemeOptionsComponent } from '../theme-options/theme-options.component';
 
 @NgModule({
     declarations: [
@@ -27,7 +27,7 @@ import { FuseThemeOptionsComponent } from '@fuse/components/theme-options/theme-
         FormsModule,
         ReactiveFormsModule,
 
-        FlexLayoutModule,
+        // FlexLayoutModule, // deprecated
 
         MatButtonModule,
         MatCheckboxModule,

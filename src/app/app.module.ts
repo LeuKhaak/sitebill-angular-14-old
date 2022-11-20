@@ -69,8 +69,7 @@ import {ConfigService} from './_services/config.service';
 import {GetApiUrlService} from './_services/_getapiurlservice/get-api-url.service';
 import {GetSessionKeyService} from './_services/get-session-key.service';
 import {UiService} from './_services/ui.service';
-import {GridModule} from './main/grid/grid.module';
-import {GridComponent} from './main/grid/grid.component';
+// import {GridModule} from './main/grid/grid.module';
 
 
 let appRoutes: Routes = [
@@ -187,7 +186,7 @@ let appRoutes: Routes = [
     // Bitrix24Router,
   ],
   imports     : [
-    GridModule,
+    // GridModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,

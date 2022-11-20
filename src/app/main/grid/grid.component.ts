@@ -20,6 +20,7 @@ import {
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import {GetApiUrlService} from '../../_services/_getapiurlservice/get-api-url.service';
 
 @Component({
   selector: 'app-grid',
@@ -28,13 +29,13 @@ import { Router } from '@angular/router';
 })
 export class GridComponent implements OnInit {
   rows_data = [];
-  grid_meta = [];
+  grid_meta: {[index: string]: any} = {};
   page = new Page();
   entity: SitebillEntity;
   loadingIndicator = false;
   error = false;
   error_message = '';
-  columns_index = [];
+  columns_index: {[index: string]: number} = {};
   rows_index = [];
   data_all = -1;
   refresh_complete = false;
@@ -49,7 +50,7 @@ export class GridComponent implements OnInit {
   protected predefined_grid_params: { [index: string]: any } | null = {};
 
   @ViewChild(CommonTemplateComponent)
-  public commonTemplate: CommonTemplateComponent;
+  public commonTemplate: CommonTemplateComponent | undefined;
 
   @Input('freeze_default_columns_list')
   freeze_default_columns_list = false;
@@ -281,12 +282,27 @@ export class GridComponent implements OnInit {
     return parser_result.params;
   }
 
+  get_control_column() {
+    if (!this.commonTemplate) return;
+    let control_column = {
+      headerTemplate: this.commonTemplate.controlHdrTmpl,
+      cellTemplate: this.commonTemplate.controlTmpl,
+      width: 40,
+      type: 'primary_key',
+      ngx_name: this.entity.primary_key + '.title',
+      model_name: this.entity.primary_key,
+      title: '',
+      prop: this.entity.primary_key + '.value'
+    };
+    return control_column;
+  }
+
   compose_columns(columns_list: string[], model: SitebillModelItem[]) {
     // delete this.data_columns;
     this.data_columns = [];
     // проходим по columns_list
     // для каждой вытягиваем из model информацию и добавляем в объект КОЛОНКИ
-    if (this.enable_select_rows) {
+    if (this.enable_select_rows && this.commonTemplate) {
       this.data_columns = [
         {
           cellTemplate: this.commonTemplate.gridCheckboxTmpl,
@@ -300,7 +316,7 @@ export class GridComponent implements OnInit {
 
     this.data_columns.push(this.get_control_column());
 
-    columns_list.forEach((row, index) => {
+    columns_list.forEach((row , index) => {
       if (this.columns_index[row] == null) {
         return;
       }
@@ -321,7 +337,7 @@ export class GridComponent implements OnInit {
           }
         }
       }
-
+      if (!this.commonTemplate) return;
       switch (model[this.columns_index[row]].type) {
         case 'safe_string':
           if (this.isMessengerEnabled(model[this.columns_index[row]])) {
@@ -397,7 +413,25 @@ export class GridComponent implements OnInit {
       this.data_columns.push(column);
     });
     this.after_compose();
-    console.log(this.data_columns);
+    // console.log(this.data_columns);
+  }
+
+  isMessengerEnabled ( modelItem: SitebillModelItem ) {
+    if (
+      modelItem.name === 'phone' ||
+      (
+        modelItem.parameters &&
+        modelItem.parameters['messenger'] === '1'
+      )
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  get_header_template() {
+    if (!this.commonTemplate) return;
+    return this.commonTemplate.hdrTpl;
   }
 
   after_compose() {

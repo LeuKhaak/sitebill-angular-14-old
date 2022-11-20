@@ -24,7 +24,7 @@ export class FuseSidebarService
      * @param key
      * @param sidebar
      */
-    register(key, sidebar): void
+    register(key: string, sidebar: any): void // sidebar: any ???
     {
         // Check if the key already being used
         if ( this._registry[key] )
@@ -43,7 +43,7 @@ export class FuseSidebarService
      *
      * @param key
      */
-    unregister(key): void
+    unregister(key: string): void
     {
         // Check if the sidebar exists
         if ( !this._registry[key] )
@@ -61,7 +61,7 @@ export class FuseSidebarService
      * @param key
      * @returns {FuseSidebarComponent}
      */
-    getSidebar(key): FuseSidebarComponent
+    getSidebar(key: string): FuseSidebarComponent | undefined
     {
         // Check if the sidebar exists
         if ( !this._registry[key] )

@@ -1,6 +1,6 @@
 export class SitebillResponse {
-    state: string;
-    message: string;
+    state: string | undefined;
+    message: string | undefined;
     data: any;
     public static state: string;
 

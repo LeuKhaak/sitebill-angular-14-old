@@ -5,6 +5,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import {SlicePipe} from '@angular/common';
 
 // import { FuseSharedModule} from '../../../@fuse/shared.module';
 // import { FuseWidgetModule} from '../../../@fuse/components';
@@ -24,7 +25,7 @@ import { FilterService} from '../../_services/filter.service';
 // import { FilterComponent } from 'app/main/grid/filter.component';
 // import { DeclineClientComponent } from 'app/dialogs//decline-client/decline-client.component';
 // import { GridSettingsSidenavComponent } from 'app/main/grid/sidenavs/settings/settings.component';
-// import { CommonTemplateComponent } from 'app/main/grid/common-template/common-template.component';
+import { CommonTemplateComponent } from './common-template/common-template.component';
 
 import { NgSelectModule } from '@ng-select/ng-select';
 // import { QuillModule } from 'ngx-quill'; // old ??? ОШИБКА
@@ -35,7 +36,7 @@ import { UploadxModule} from 'ngx-uploadx'; // new ???
 // import { NgxGalleryModule } from '@kolkov/ngx-gallery'; // new ??? НЕ УСТАНАВЛИВАЕТСЯ
 // import { Ng5SliderModule } from 'ng5-slider'; // old ???
 import { NgxSliderModule } from '@angular-slider/ngx-slider'; // new ???
-// import { ReplacePipe } from 'app/pipes/replace.pipe';
+import { ReplacePipe } from 'src/app/pipes/replace.pipe';
 // import { UserComponent } from './user/user.component';
 // import { AgmCoreModule } from '@agm/core'; // old ??? НЕ УСТАНАВЛИВАЕТСЯ
 // import { CityComponent } from './entity/city/city.component';
@@ -381,8 +382,9 @@ const routes = [
     // ReportComponent,
     // SaveSearchComponent,
     // GridSettingsSidenavComponent,
-    // ReplacePipe,
-    // CommonTemplateComponent,
+       ReplacePipe,
+       SlicePipe,
+       CommonTemplateComponent,
     // CollectionsComponent,
     // MemoryListComponent,
     // FrontComponent,
@@ -490,7 +492,7 @@ const routes = [
   ],
   entryComponents: [
     // DeclineClientComponent,
-    // CommonTemplateComponent,
+       CommonTemplateComponent,
     // ComposeModalComponent,
     // ReportComponent,
     // SaveSearchComponent,

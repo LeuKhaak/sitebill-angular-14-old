@@ -14,7 +14,7 @@ export class FuseWidgetComponent implements AfterContentInit
     flipped = false;
 
     @ContentChildren(FuseWidgetToggleDirective, {descendants: true})
-    toggleButtons: QueryList<FuseWidgetToggleDirective>;
+    toggleButtons: QueryList<FuseWidgetToggleDirective> | undefined;
 
     /**
      * Constructor
@@ -40,6 +40,7 @@ export class FuseWidgetComponent implements AfterContentInit
     {
         // Listen for the flip button click
         setTimeout(() => {
+            if (!this.toggleButtons) return;
             this.toggleButtons.forEach(flipButton => {
                 this._renderer.listen(flipButton.elementRef.nativeElement, 'click', (event) => {
                     event.preventDefault();

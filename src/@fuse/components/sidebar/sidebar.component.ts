@@ -2,13 +2,13 @@ import {
     ChangeDetectorRef, Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, OnDestroy, OnInit, Output, Renderer2, ViewEncapsulation
 } from '@angular/core';
 import { animate, AnimationBuilder, AnimationPlayer, style } from '@angular/animations';
-import { MediaObserver } from '@angular/flex-layout';
+// import { MediaObserver } from '@angular/flex-layout'; // deprecated
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { FuseSidebarService } from './sidebar.service';
-import { FuseMatchMediaService } from '@fuse/services/match-media.service';
-import { FuseConfigService } from '@fuse/services/config.service';
+import { FuseMatchMediaService } from '../../services/match-media.service';
+import { FuseConfigService } from '../../services/config.service';
 
 @Component({
     selector     : 'fuse-sidebar',
@@ -20,11 +20,11 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
 {
     // Name
     @Input()
-    name: string;
+    name = '';
 
     // Key
     @Input()
-    key: string;
+    key = '';
 
     // Position
     @Input()
@@ -36,11 +36,11 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
 
     // Locked Open
     @Input()
-    lockedOpen: string;
+    lockedOpen = '';
 
     // isLockedOpen
     @HostBinding('class.locked-open')
-    isLockedOpen: boolean;
+    isLockedOpen = false;
 
     // Folded width
     @Input()
@@ -52,7 +52,7 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
 
     // Folded unfolded
     @HostBinding('class.unfolded')
-    unfolded: boolean;
+    unfolded = false;
 
     // Invisible overlay
     @Input()
@@ -69,10 +69,10 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
     // Private
     private _folded: boolean;
     private _fuseConfig: any;
-    private _wasActive: boolean;
-    private _wasFolded: boolean;
+    private _wasActive = false;
+    private _wasFolded = false;
     private _backdrop: HTMLElement | null = null;
-    private _player: AnimationPlayer;
+    private _player: AnimationPlayer | undefined;
     private _unsubscribeAll: Subject<any>;
 
     @HostBinding('class.animations-enabled')
@@ -97,7 +97,7 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
         private _fuseConfigService: FuseConfigService,
         private _fuseMatchMediaService: FuseMatchMediaService,
         private _fuseSidebarService: FuseSidebarService,
-        private _mediaObserver: MediaObserver,
+        // private _mediaObserver: MediaObserver, // deprecated
         private _renderer: Renderer2
     )
     {
@@ -214,7 +214,7 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
         // Subscribe to config changes
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((config) => {
+            .subscribe((config: any) => {
                 this._fuseConfig = config;
             });
 
@@ -249,7 +249,7 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
         this._fuseSidebarService.unregister(this.name);
 
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -314,72 +314,72 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
         this._showSidebar();
 
         // Act on every media change
-        this._fuseMatchMediaService.onMediaChange
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe(() => {
-
-                // Get the active status
-                const isActive = this._mediaObserver.isActive(this.lockedOpen);
-
-                // If the both status are the same, don't act
-                if ( this._wasActive === isActive )
-                {
-                    return;
-                }
-
-                // Activate the lockedOpen
-                if ( isActive )
-                {
-                    // Set the lockedOpen status
-                    this.isLockedOpen = true;
-
-                    // Show the sidebar
-                    this._showSidebar();
-
-                    // Force the the opened status to true
-                    this.opened = true;
-
-                    // Emit the 'openedChanged' event
-                    this.openedChanged.emit(this.opened);
-
-                    // If the sidebar was folded, forcefully fold it again
-                    if ( this._wasFolded )
-                    {
-                        // Enable the animations
-                        this._enableAnimations();
-
-                        // Fold
-                        this.folded = true;
-
-                        // Mark for check
-                        this._changeDetectorRef.markForCheck();
-                    }
-
-                    // Hide the backdrop if any exists
-                    this._hideBackdrop();
-                }
-                // De-Activate the lockedOpen
-                else
-                {
-                    // Set the lockedOpen status
-                    this.isLockedOpen = false;
-
-                    // Unfold the sidebar in case if it was folded
-                    this.unfold();
-
-                    // Force the the opened status to close
-                    this.opened = false;
-
-                    // Emit the 'openedChanged' event
-                    this.openedChanged.emit(this.opened);
-
-                    // Hide the sidebar
-                    this._hideSidebar();
-                }
-
-                // Store the new active status
-                this._wasActive = isActive;
-            });
+        // this._fuseMatchMediaService.onMediaChange // @angular/flex-layout'; // deprecated
+        //     .pipe(takeUntil(this._unsubscribeAll))
+        //     .subscribe(() => {
+        //
+        //         // Get the active status
+        //         const isActive = this._mediaObserver.isActive(this.lockedOpen);
+        //
+        //         // If the both status are the same, don't act
+        //         if ( this._wasActive === isActive )
+        //         {
+        //             return;
+        //         }
+        //
+        //         // Activate the lockedOpen
+        //         if ( isActive )
+        //         {
+        //             // Set the lockedOpen status
+        //             this.isLockedOpen = true;
+        //
+        //             // Show the sidebar
+        //             this._showSidebar();
+        //
+        //             // Force the the opened status to true
+        //             this.opened = true;
+        //
+        //             // Emit the 'openedChanged' event
+        //             this.openedChanged.emit(this.opened);
+        //
+        //             // If the sidebar was folded, forcefully fold it again
+        //             if ( this._wasFolded )
+        //             {
+        //                 // Enable the animations
+        //                 this._enableAnimations();
+        //
+        //                 // Fold
+        //                 this.folded = true;
+        //
+        //                 // Mark for check
+        //                 this._changeDetectorRef.markForCheck();
+        //             }
+        //
+        //             // Hide the backdrop if any exists
+        //             this._hideBackdrop();
+        //         }
+        //         // De-Activate the lockedOpen
+        //         else
+        //         {
+        //             // Set the lockedOpen status
+        //             this.isLockedOpen = false;
+        //
+        //             // Unfold the sidebar in case if it was folded
+        //             this.unfold();
+        //
+        //             // Force the the opened status to close
+        //             this.opened = false;
+        //
+        //             // Emit the 'openedChanged' event
+        //             this.openedChanged.emit(this.opened);
+        //
+        //             // Hide the sidebar
+        //             this._hideSidebar();
+        //         }
+        //
+        //         // Store the new active status
+        //         this._wasActive = isActive;
+        //     });
     }
 
     /**
@@ -444,11 +444,11 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
      *
      * @private
      */
-    private _showBackdrop(): void
-    {
+    private _showBackdrop(): void    {
+
         // Create the backdrop element
         this._backdrop = this._renderer.createElement('div');
-
+        if (! this._backdrop) return;
         // Add a class to the backdrop element
         this._backdrop.classList.add('fuse-sidebar-overlay');
 
@@ -507,7 +507,7 @@ export class FuseSidebarComponent implements OnInit, OnDestroy
         this._player.onDone(() => {
 
             // If the backdrop still exists...
-            if ( this._backdrop )
+            if ( this._backdrop &&  this._backdrop.parentNode)
             {
                 // Remove the backdrop
                 this._backdrop.parentNode.removeChild(this._backdrop);

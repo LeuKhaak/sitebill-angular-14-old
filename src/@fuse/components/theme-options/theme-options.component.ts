@@ -4,10 +4,10 @@ import { DOCUMENT } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { fuseAnimations } from '@fuse/animations';
-import { FuseConfigService } from '@fuse/services/config.service';
-import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
+import { fuseAnimations } from '../../animations';
+import { FuseConfigService } from '../../services/config.service';
+import { FuseNavigationService } from '../../components/navigation/navigation.service';
+import { FuseSidebarService } from '../../components/sidebar/sidebar.service';
 
 @Component({
     selector     : 'fuse-theme-options',
@@ -19,7 +19,7 @@ import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 export class FuseThemeOptionsComponent implements OnInit, OnDestroy
 {
     fuseConfig: any;
-    form: FormGroup;
+    form: FormGroup | undefined;
 
     @HostBinding('class.bar-closed')
     barClosed: boolean;
@@ -100,25 +100,28 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
         // Subscribe to the config changes
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((config) => {
+            .subscribe((config: any) => {
 
                 // Update the stored config
                 this.fuseConfig = config;
 
                 // Set the config form values without emitting an event
                 // so that we don't end up with an infinite loop
+                if (!this.form) return;
                 this.form.setValue(config, {emitEvent: false});
             });
 
         // Subscribe to the specific form value changes (layout.style)
-        this.form.get('layout.style').valueChanges
+        if (!this.form || this.form.get('layout.style') === null) return;
+          this.form.get('layout.style')?.valueChanges
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
 
-                // Reset the form values based on the
-                // selected layout style
-                this._resetFormValues(value);
+              // Reset the form values based on the
+              // selected layout style
+              this._resetFormValues(value);
             });
+
 
         // Subscribe to the form value changes
         this.form.valueChanges
@@ -157,7 +160,7 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
 
         // Remove the custom function menu
@@ -175,8 +178,9 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
      * @param value
      * @private
      */
-    private _resetFormValues(value): void
+    private _resetFormValues(value: string): void
     {
+        if (!this.form) return;
         switch ( value )
         {
             // Vertical Layout #1
@@ -334,7 +338,7 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
      *
      * @param key
      */
-    toggleSidebarOpen(key): void
+    toggleSidebarOpen(key: string): void
     {
         this._fuseSidebarService.getSidebar(key).toggleOpen();
     }
