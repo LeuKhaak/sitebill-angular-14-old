@@ -12,7 +12,7 @@ import { Injectable } from '@angular/core';
 })
 export class FuseCopierService
 {
-    private textarea: HTMLTextAreaElement;
+    private textarea: HTMLTextAreaElement | null = null;
 
     /**
      * Copy the text value to the clipboard

@@ -13,7 +13,7 @@ export class FuseCountdownComponent implements OnInit, OnDestroy
 {
     // Event date
     @Input('eventDate')
-    eventDate;
+    eventDate: any;
 
     countdown: any;
 
@@ -81,7 +81,7 @@ export class FuseCountdownComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -95,7 +95,7 @@ export class FuseCountdownComponent implements OnInit, OnDestroy
      * @param seconds
      * @private
      */
-    private _secondsToRemaining(seconds): any
+    private _secondsToRemaining(seconds: number): any
     {
         const timeLeft = moment.duration(seconds, 'seconds');
 

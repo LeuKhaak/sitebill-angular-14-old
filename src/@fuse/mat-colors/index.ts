@@ -5,7 +5,7 @@ const white12 = 'rgba(white, 0.12)';
 const black6 = 'rgba(black, 0.06)';
 const white6 = 'rgba(white, 0.06)';
 
-const matColors = {
+const matColors: {[index: string]: any} = {
     'red': {
         50      : '#ffebee',
         100     : '#ffcdd2',
@@ -715,7 +715,7 @@ export class MatColors
     public static all = matColors;
     public static presets = matPresetColors;
 
-    public static getColor(colorName): any
+    public static getColor(colorName: string): any
     {
         if ( matColors[colorName] )
         {

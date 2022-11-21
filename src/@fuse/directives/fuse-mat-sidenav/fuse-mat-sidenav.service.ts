@@ -26,7 +26,7 @@ export class FuseMatSidenavHelperService
      * @param id
      * @param instance
      */
-    setSidenav(id, instance): void
+    setSidenav(id: number, instance: any): void // any ???
     {
         this.sidenavInstances[id] = instance;
     }
@@ -37,7 +37,7 @@ export class FuseMatSidenavHelperService
      * @param id
      * @returns {any}
      */
-    getSidenav(id): any
+    getSidenav(id: number): any
     {
         return this.sidenavInstances[id];
     }

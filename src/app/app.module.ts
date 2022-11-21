@@ -9,9 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import 'hammerjs';
 
-// import { FuseModule } from '@fuse/fuse.module';
-// import { FuseSharedModule } from '@fuse/shared.module';
-// import { FuseProgressBarModule, FuseSidebarModule, FuseThemeOptionsModule } from '@fuse/components';
+import { FuseModule} from '../@fuse/fuse.module';
+import { FuseSharedModule} from '../@fuse/shared.module';
+import { FuseProgressBarModule, FuseSidebarModule, FuseThemeOptionsModule} from '../@fuse/components';
 
 // import { fuseConfig } from 'app/fuse-config';
 import {AppConfigModule} from './app.config.module';
@@ -225,10 +225,10 @@ let appRoutes: Routes = [
 
     // Fuse modules
     // FuseModule.forRoot(fuseConfig),
-    // FuseProgressBarModule,
-    // FuseSharedModule,
-    // FuseSidebarModule,
-    // FuseThemeOptionsModule,
+    FuseProgressBarModule,
+    FuseSharedModule,
+    FuseSidebarModule,
+    FuseThemeOptionsModule,
 
     // App modules
     // LayoutModule,

@@ -2,7 +2,8 @@ import { Component, ContentChild, ElementRef, Input, OnDestroy, OnInit } from '@
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import * as Prism from 'prismjs/prism';
+// import * as Prism from 'prismjs/prism';
+import { highlight, languages, highlightElement } from 'prismjs';
 import '@fuse/components/highlight/prism-languages';
 
 @Component({
@@ -14,15 +15,15 @@ export class FuseHighlightComponent implements OnInit, OnDestroy
 {
     // Source
     @ContentChild('source', {static: true})
-    source: ElementRef;
+    source: ElementRef | undefined;
 
     // Lang
     @Input('lang')
-    lang: string;
+    lang = '';
 
     // Path
     @Input('path')
-    path: string;
+    path = '';
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -35,7 +36,7 @@ export class FuseHighlightComponent implements OnInit, OnDestroy
      */
     constructor(
         private _elementRef: ElementRef,
-        private _httpClient: HttpClient
+        private _httpClient: HttpClient,
     )
     {
         // Set the private defaults
@@ -84,7 +85,7 @@ export class FuseHighlightComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -97,7 +98,7 @@ export class FuseHighlightComponent implements OnInit, OnDestroy
      *
      * @param sourceCode
      */
-    highlight(sourceCode): void
+    highlight(sourceCode: string): void
     {
         // Split the source into lines
         const sourceLines = sourceCode.split('\n');
@@ -139,7 +140,7 @@ export class FuseHighlightComponent implements OnInit, OnDestroy
         });
 
         // Generate the highlighted code
-        const highlightedCode = Prism.highlight(source, Prism.languages[this.lang]);
+        const highlightedCode = highlight(source, languages[this.lang], 'js');
 
         // Replace the innerHTML of the component with the highlighted code
         this._elementRef.nativeElement.innerHTML =

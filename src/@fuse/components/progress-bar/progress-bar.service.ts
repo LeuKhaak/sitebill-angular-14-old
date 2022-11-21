@@ -9,10 +9,10 @@ import { filter } from 'rxjs/operators';
 export class FuseProgressBarService
 {
     // Private
-    private _bufferValue: BehaviorSubject<number>;
-    private _mode: BehaviorSubject<string>;
-    private _value: BehaviorSubject<number>;
-    private _visible: BehaviorSubject<boolean>;
+    private _bufferValue: BehaviorSubject<number> | undefined;
+    private _mode: BehaviorSubject<string> | undefined;
+    private _value: BehaviorSubject<number> | undefined;
+    private _visible: BehaviorSubject<boolean> | undefined;
 
     /**
      * Constructor
@@ -34,48 +34,55 @@ export class FuseProgressBarService
     /**
      * Buffer value
      */
-    get bufferValue(): Observable<any>
+    get bufferValue(): Observable<any> | undefined
     {
+        if (!this._bufferValue) return;
         return this._bufferValue.asObservable();
     }
 
     setBufferValue(value: number): void
     {
+        if (!this._bufferValue) return;
         this._bufferValue.next(value);
     }
 
     /**
      * Mode
      */
-    get mode(): Observable<any>
+    get mode(): Observable<any> | undefined
     {
-        return this._mode.asObservable();
+      if (!this._mode) return;
+      return this._mode.asObservable();
     }
 
     setMode(value: 'determinate' | 'indeterminate' | 'buffer' | 'query'): void
     {
-        this._mode.next(value);
+      if (!this._mode) return;
+      this._mode.next(value);
     }
 
     /**
      * Value
      */
-    get value(): Observable<any>
+    get value(): Observable<any> | undefined
     {
-        return this._value.asObservable();
+      if (!this._value) return;
+      return this._value.asObservable();
     }
 
     setValue(value: number): void
     {
-        this._value.next(value);
+      if (!this._value) return;
+      this._value.next(value);
     }
 
     /**
      * Visible
      */
-    get visible(): Observable<any>
+    get visible(): Observable<any> | undefined
     {
-        return this._visible.asObservable();
+      if (!this._visible) return;
+      return this._visible.asObservable();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -118,7 +125,8 @@ export class FuseProgressBarService
      */
     show(): void
     {
-        this._visible.next(true);
+      if (!this._visible) return;
+      this._visible.next(true);
     }
 
     /**
@@ -126,7 +134,8 @@ export class FuseProgressBarService
      */
     hide(): void
     {
-        this._visible.next(false);
+      if (!this._visible) return;
+      this._visible.next(false);
     }
 }
 

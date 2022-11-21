@@ -4,12 +4,14 @@ import { CookieService } from 'ngx-cookie-service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseMatchMediaService } from '@fuse/services/match-media.service';
-import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
-import {ModelService} from '../../../app/_services/model.service';
+import { FuseMatchMediaService } from '../../services/match-media.service';
+import { FuseNavigationService } from '../../components/navigation/navigation.service';
+import {ModelService} from '../../../app/_services/_modelservice/model.service';
 import {GetSessionKeyService} from '../../../app/_services/get-session-key.service';
-import {SitebillEntity} from '../../../app/_models';
-import {Bitrix24Service} from '../../../app/integrations/bitrix24/bitrix24.service';
+import {GetApiUrlService} from '../../../app/_services/_getapiurlservice/get-api-url.service';
+import {ConfigService} from '../../../app/_services/config.service';
+import {SitebillEntity} from '../../../app/_models/sitebillentity';
+// import {Bitrix24Service} from '../../../app/integrations/bitrix24/bitrix24.service';
 
 @Component({
     selector   : 'fuse-shortcuts',
@@ -20,8 +22,8 @@ import {Bitrix24Service} from '../../../app/integrations/bitrix24/bitrix24.servi
 export class FuseShortcutsComponent implements OnInit, OnDestroy
 {
     shortcutItems: any[];
-    navigationItems: any[];
-    filteredNavigationItems: any[];
+    navigationItems: any[] = [];
+    filteredNavigationItems: any[] = [];
     searching: boolean;
     mobileShortcutsPanelActive: boolean;
     entity: SitebillEntity;
@@ -30,14 +32,14 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
     navigation: any;
 
     @ViewChild('searchInput')
-    searchInputField;
+    searchInputField: any;
 
     @ViewChild('shortcuts')
-    shortcutsEl: ElementRef;
+    shortcutsEl: ElementRef | undefined;
 
     // Private
     private _unsubscribeAll: Subject<any>;
-    private prev_entity_name: string;
+    private prev_entity_name = '';
 
     /**
      * Constructor
@@ -58,9 +60,11 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
         private _fuseNavigationService: FuseNavigationService,
         private _observableMedia: MediaObserver,
         private _renderer: Renderer2,
-        private bitrix24Service: Bitrix24Service,
+        // private bitrix24Service: Bitrix24Service,
         public modelService: ModelService,
         public getSessionKeyService: GetSessionKeyService,
+        public getApiUrlService: GetApiUrlService,
+        public  configService: ConfigService,
         protected cdr: ChangeDetectorRef,
     )
     {
@@ -68,6 +72,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
         this.shortcutItems = [];
         this.searching = false;
         this.mobileShortcutsPanelActive = false;
+        this.entity = new SitebillEntity();
 
         // Set the private defaults
         this._unsubscribeAll = new Subject();
@@ -116,7 +121,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
     set_default_shortcuts () {
         // console.log('apps.products.contacts_market');
         // console.log(this.modelService.getConfigValue('apps.products.contacts_market'));
-        if ( this.getSessionKeyService.getConfigValue('apps.products.contacts_market') === 1 ) {
+        if ( this.configService.getConfigValue('apps.products.contacts_market') === 1 ) {
             // console.log('market icons');
             // User's shortcut items
             this.shortcutItems.push({
@@ -153,7 +158,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
         // console.log('reinit ' + entity.get_app_name());
         this.clear_shortcuts();
         this.set_default_shortcuts();
-        if ( entity.get_app_name() === 'data' && !this.bitrix24Service.is_bitrix24_inited() ) {
+        if ( entity.get_app_name() === 'data' ) { // && !this.bitrix24Service.is_bitrix24_inited()
             this.shortcutItems.push({
                 'title': 'Мои объекты',
                 'type' : 'item',
@@ -175,12 +180,12 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
 
     ngAfterViewChecked() {
         if ( this.entity === null || this.entity === undefined ) {
-            this.entity = this.modelService.get_current_entity();
+            this.entity = this.getApiUrlService.get_current_entity();
         }
         if ( this.entity !== null && this.entity !== undefined ) {
-            if ( this.prev_entity_name !== this.modelService.get_current_entity().get_app_name() ) {
-                this.entity = this.modelService.get_current_entity();
-                this.prev_entity_name = this.modelService.get_current_entity().get_app_name();
+            if ( this.prev_entity_name !== this.getApiUrlService.get_current_entity().get_app_name() ) {
+                this.entity = this.getApiUrlService.get_current_entity();
+                this.prev_entity_name = this.getApiUrlService.get_current_entity().get_app_name();
                 setTimeout(() => {
                     this.reinit_shortcuts(this.entity);
                     // this.cdr.markForCheck();
@@ -199,7 +204,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -212,7 +217,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
      *
      * @param event
      */
-    search(event): void
+    search(event: any): void // any ???
     {
         const value = event.target.value.toLowerCase();
 
@@ -237,7 +242,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
      * @param event
      * @param itemToToggle
      */
-    toggleShortcut(event, itemToToggle): void
+    toggleShortcut(event: any, itemToToggle: any): void // any ???
     {
         event.stopPropagation();
 
@@ -266,7 +271,7 @@ export class FuseShortcutsComponent implements OnInit, OnDestroy
      * @param navigationItem
      * @returns {any}
      */
-    isInShortcuts(navigationItem): any
+    isInShortcuts(navigationItem: any): any
     {
         return this.shortcutItems.find(item => {
             return item.url === navigationItem.url;

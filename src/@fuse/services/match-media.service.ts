@@ -39,7 +39,8 @@ export class FuseMatchMediaService
      */
     private _init(): void
     {
-        this._mediaObserver.media$
+        // @ts-ignore
+      this._mediaObserver._media$  // private _media$ ???
             .pipe(
                 debounceTime(500),
                 distinctUntilChanged()

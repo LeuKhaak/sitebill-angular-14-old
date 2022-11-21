@@ -2,8 +2,8 @@ import { ChangeDetectorRef, Component, HostBinding, Input, OnDestroy, OnInit } f
 import { merge, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseNavigationItem } from '@fuse/types';
-import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { FuseNavigationItem } from '../../../../types';
+import { FuseNavigationService } from '../../../../components/navigation/navigation.service';
 
 @Component({
     selector   : 'fuse-nav-vertical-group',
@@ -16,7 +16,7 @@ export class FuseNavVerticalGroupComponent implements OnInit, OnDestroy
     classes = 'nav-group nav-item';
 
     @Input()
-    item: FuseNavigationItem;
+    item: FuseNavigationItem | undefined;
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -67,7 +67,7 @@ export class FuseNavVerticalGroupComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 

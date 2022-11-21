@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import * as _ from 'lodash';
 
-import { FuseNavigationItem } from '@fuse/types';
+import { FuseNavigationItem } from '../../types';
 
 @Injectable({
     providedIn: 'root'
@@ -33,7 +33,7 @@ export class FuseNavigationService
         this.onItemCollapseToggled = new Subject();
 
         // Set the private defaults
-        this._currentNavigationKey = null;
+        this._currentNavigationKey = '';
         this._onNavigationChanged = new BehaviorSubject(null);
         this._onNavigationRegistered = new BehaviorSubject(null);
         this._onNavigationUnregistered = new BehaviorSubject(null);
@@ -117,7 +117,7 @@ export class FuseNavigationService
      * @param key
      * @param navigation
      */
-    register(key, navigation): void
+    register(key: string, navigation: any): void // any ???
     {
         // Check if the key already being used
         if ( this._registry[key] )
@@ -138,7 +138,7 @@ export class FuseNavigationService
      * Unregister the navigation from the registry
      * @param key
      */
-    unregister(key): void
+    unregister(key: string): void
     {
         // Check if the navigation exists
         if ( !this._registry[key] )
@@ -159,7 +159,7 @@ export class FuseNavigationService
      * @param key
      * @returns {any}
      */
-    getNavigation(key): any
+    getNavigation(key: string): any
     {
         // Check if the navigation exists
         if ( !this._registry[key] )
@@ -180,7 +180,7 @@ export class FuseNavigationService
      * @param flatNavigation
      * @returns {any[]}
      */
-    getFlatNavigation(navigation, flatNavigation: FuseNavigationItem[] = []): any
+    getFlatNavigation(navigation: any, flatNavigation: FuseNavigationItem[] = []): any // any ???
     {
         for ( const item of navigation )
         {
@@ -226,7 +226,7 @@ export class FuseNavigationService
      *
      * @param key
      */
-    setCurrentNavigation(key): void
+    setCurrentNavigation(key: string): void
     {
         // Check if the sidebar exists
         if ( !this._registry[key] )
@@ -251,11 +251,12 @@ export class FuseNavigationService
      * @param {any} navigation
      * @returns {any | boolean}
      */
-    getNavigationItem(id, navigation = null): any | boolean
+    getNavigationItem(id: string, navigation: any = null): any | boolean // any???
     {
         if ( !navigation )
         {
             navigation = this.getCurrentNavigation();
+            return;
         }
 
         for ( const item of navigation )
@@ -287,12 +288,13 @@ export class FuseNavigationService
      * @param {any} navigation
      * @param parent
      */
-    getNavigationItemParent(id, navigation = null, parent = null): any
+    getNavigationItemParent(id: string, navigation: any = null, parent = null): any // any???
     {
         if ( !navigation )
         {
             navigation = this.getCurrentNavigation();
             parent = navigation;
+            return;
         }
 
         for ( const item of navigation )
@@ -322,7 +324,7 @@ export class FuseNavigationService
      * @param item
      * @param id
      */
-    addNavigationItem(item, id): void
+    addNavigationItem(item: any, id: string): void // any???
     {
         // Get the current navigation
         const navigation: any[] = this.getCurrentNavigation();
@@ -375,7 +377,7 @@ export class FuseNavigationService
      * @param id
      * @param properties
      */
-    updateNavigationItem(id, properties): void
+    updateNavigationItem(id: string, properties: any): void // any???
     {
         // Get the navigation item
         const navigationItem = this.getNavigationItem(id);
@@ -398,7 +400,7 @@ export class FuseNavigationService
      *
      * @param id
      */
-    removeNavigationItem(id): void
+    removeNavigationItem(id: string): void
     {
         const item = this.getNavigationItem(id);
 

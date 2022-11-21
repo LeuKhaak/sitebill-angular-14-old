@@ -338,8 +338,8 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
      *
      * @param key
      */
-    toggleSidebarOpen(key: string): void
-    {
-        this._fuseSidebarService.getSidebar(key).toggleOpen();
+    toggleSidebarOpen(key: string): void    {
+
+        this._fuseSidebarService.getSidebar(key)?.toggleOpen(); // ?. ????
     }
 }

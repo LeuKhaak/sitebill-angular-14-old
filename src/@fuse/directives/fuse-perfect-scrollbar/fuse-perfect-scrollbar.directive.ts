@@ -5,8 +5,8 @@ import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import PerfectScrollbar from 'perfect-scrollbar';
 import * as _ from 'lodash';
-import { FusePerfectScrollbarGeometry, FusePerfectScrollbarPosition } from '@fuse/directives/fuse-perfect-scrollbar/fuse-perfect-scrollbar.interfaces';
-import { FuseConfigService } from '@fuse/services/config.service';
+import { FusePerfectScrollbarGeometry, FusePerfectScrollbarPosition } from './fuse-perfect-scrollbar.interfaces';
+import { FuseConfigService } from '../../services/config.service';
 
 @Directive({
     selector: '[fusePerfectScrollbar]'
@@ -158,7 +158,7 @@ export class FusePerfectScrollbarDirective implements OnInit, AfterViewInit, OnD
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(
-                (settings) => {
+                (settings: any) => {
                     this.enabled = settings.customScrollbars;
                 }
             );
@@ -188,7 +188,7 @@ export class FusePerfectScrollbarDirective implements OnInit, AfterViewInit, OnD
         this._destroy();
 
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -233,7 +233,7 @@ export class FusePerfectScrollbarDirective implements OnInit, AfterViewInit, OnD
         // Unbind 'keydown' events of PerfectScrollbar since it causes an extremely
         // high CPU usage on Angular Material inputs.
         // Loop through all the event elements of this PerfectScrollbar instance
-        this.ps.event.eventElements.forEach((eventElement) => {
+        this.ps.event.eventElements.forEach((eventElement: any) => {
 
             // If we hit to the element with a 'keydown' event...
             if ( typeof eventElement.handlers['keydown'] !== 'undefined' )

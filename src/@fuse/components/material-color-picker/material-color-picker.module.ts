@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// import { FlexLayoutModule } from '@angular/flex-layout'; // deprecated
+import { FlexLayoutModule } from '@angular/flex-layout'; // deprecated
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -17,7 +17,7 @@ import { FuseMaterialColorPickerComponent } from '../../components/material-colo
     imports: [
         CommonModule,
 
-        // FlexLayoutModule,
+        FlexLayoutModule,
 
         MatButtonModule,
         MatIconModule,

@@ -7,7 +7,7 @@ export class FuseUtils
      * @param searchText
      * @returns {any}
      */
-    public static filterArrayByString(mainArr, searchText): any
+    public static filterArrayByString(mainArr: any[], searchText: string): any
     {
         if ( searchText === '' )
         {
@@ -28,7 +28,7 @@ export class FuseUtils
      * @param searchText
      * @returns {boolean}
      */
-    public static searchInObj(itemObj, searchText): boolean
+    public static searchInObj(itemObj: {[index: string]: any}, searchText: string): boolean
     {
         for ( const prop in itemObj )
         {
@@ -63,6 +63,7 @@ export class FuseUtils
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -72,7 +73,7 @@ export class FuseUtils
      * @param searchText
      * @returns {boolean}
      */
-    public static searchInArray(arr, searchText): boolean
+    public static searchInArray(arr: any[], searchText: string): boolean
     {
         for ( const value of arr )
         {
@@ -92,6 +93,7 @@ export class FuseUtils
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -101,7 +103,7 @@ export class FuseUtils
      * @param searchText
      * @returns {any}
      */
-    public static searchInString(value, searchText): any
+    public static searchInString(value: string, searchText: string): any
     {
         return value.toLowerCase().includes(searchText);
     }
@@ -129,7 +131,7 @@ export class FuseUtils
      * @param item
      * @param array
      */
-    public static toggleInArray(item, array): void
+    public static toggleInArray(item: number, array: number[]): void
     {
         if ( array.indexOf(item) === -1 )
         {
@@ -147,7 +149,7 @@ export class FuseUtils
      * @param text
      * @returns {string}
      */
-    public static handleize(text): string
+    public static handleize(text: any): string // any ???
     {
         return text.toString().toLowerCase()
                    .replace(/\s+/g, '-')           // Replace spaces with -

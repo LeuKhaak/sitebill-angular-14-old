@@ -1,6 +1,6 @@
 import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
 
-import { FUSE_CONFIG } from '@fuse/services/config.service';
+import { FUSE_CONFIG } from './services/config.service';
 
 @NgModule()
 export class FuseModule
@@ -13,7 +13,7 @@ export class FuseModule
         }
     }
 
-    static forRoot(config): ModuleWithProviders<FuseModule>
+    static forRoot(config: any): ModuleWithProviders<FuseModule> // any ???
     {
         return {
             ngModule : FuseModule,

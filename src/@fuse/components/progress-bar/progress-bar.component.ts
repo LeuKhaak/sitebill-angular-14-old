@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseProgressBarService } from '@fuse/components/progress-bar/progress-bar.service';
+import { FuseProgressBarService } from '../../components/progress-bar/progress-bar.service';
 
 @Component({
     selector     : 'fuse-progress-bar',
@@ -12,10 +12,10 @@ import { FuseProgressBarService } from '@fuse/components/progress-bar/progress-b
 })
 export class FuseProgressBarComponent implements OnInit, OnDestroy
 {
-    bufferValue: number;
-    mode: 'determinate' | 'indeterminate' | 'buffer' | 'query';
-    value: number;
-    visible: boolean;
+    bufferValue = -1;
+    mode = '';//  'determinate' | 'indeterminate' | 'buffer' | 'query';
+    value = -1;
+    visible = false;
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -47,32 +47,40 @@ export class FuseProgressBarComponent implements OnInit, OnDestroy
         // Subscribe to the progress bar service properties
 
         // Buffer value
-        this._fuseProgressBarService.bufferValue
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((bufferValue) => {
-                this.bufferValue = bufferValue;
-            });
+      if (this._fuseProgressBarService && this._fuseProgressBarService.bufferValue) {
+      this._fuseProgressBarService.bufferValue
+        .pipe(takeUntil(this._unsubscribeAll))
+        .subscribe((bufferValue) => {
+          this.bufferValue = bufferValue;
+        });
+    }
 
         // Mode
+      if (this._fuseProgressBarService && this._fuseProgressBarService.mode) {
         this._fuseProgressBarService.mode
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((mode) => {
-                this.mode = mode;
-            });
+          .pipe(takeUntil(this._unsubscribeAll))
+          .subscribe((mode) => {
+            this.mode = mode;
+          });
+      }
 
         // Value
+      if (this._fuseProgressBarService && this._fuseProgressBarService.value) {
         this._fuseProgressBarService.value
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((value) => {
-                this.value = value;
-            });
+          .pipe(takeUntil(this._unsubscribeAll))
+          .subscribe((value) => {
+            this.value = value;
+          });
+      }
 
         // Visible
+      if (this._fuseProgressBarService && this._fuseProgressBarService.visible) {
         this._fuseProgressBarService.visible
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((visible) => {
-                this.visible = visible;
-            });
+          .pipe(takeUntil(this._unsubscribeAll))
+          .subscribe((visible) => {
+            this.visible = visible;
+          });
+      }
 
     }
 
@@ -82,7 +90,7 @@ export class FuseProgressBarComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 

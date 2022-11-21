@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/cor
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseConfigService } from '@fuse/services/config.service';
+import { FuseConfigService } from '../../services/config.service';
 
 @Component({
     selector   : 'fuse-search-bar',
@@ -50,7 +50,7 @@ export class FuseSearchBarComponent implements OnInit, OnDestroy
         this._fuseConfigService.config
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(
-                (config) => {
+                (config: any) => {
                     this.fuseConfig = config;
                 }
             );
@@ -62,7 +62,7 @@ export class FuseSearchBarComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -91,7 +91,7 @@ export class FuseSearchBarComponent implements OnInit, OnDestroy
      *
      * @param event
      */
-    search(event): void
+    search(event: any): void // any ???
     {
         this.input.emit(event.target.value);
     }

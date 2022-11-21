@@ -4,8 +4,8 @@ import { MediaObserver } from '@angular/flex-layout';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { FuseMatchMediaService } from '@fuse/services/match-media.service';
-import { FuseMatSidenavHelperService } from '@fuse/directives/fuse-mat-sidenav/fuse-mat-sidenav.service';
+import { FuseMatchMediaService } from '../../services/match-media.service';
+import { FuseMatSidenavHelperService } from '../../directives/fuse-mat-sidenav/fuse-mat-sidenav.service';
 
 @Directive({
     selector: '[fuseMatSidenavHelper]'
@@ -16,10 +16,10 @@ export class FuseMatSidenavHelperDirective implements OnInit, OnDestroy
     isLockedOpen: boolean;
 
     @Input()
-    fuseMatSidenavHelper: string;
+    fuseMatSidenavHelper = -1;
 
     @Input()
-    matIsLockedOpen: string;
+    matIsLockedOpen = '';
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -95,7 +95,7 @@ export class FuseMatSidenavHelperDirective implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 }
@@ -106,7 +106,7 @@ export class FuseMatSidenavHelperDirective implements OnInit, OnDestroy
 export class FuseMatSidenavTogglerDirective
 {
     @Input()
-    fuseMatSidenavToggler: string;
+    fuseMatSidenavToggler = -1;
 
     /**
      * Constructor

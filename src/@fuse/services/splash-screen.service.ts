@@ -11,7 +11,7 @@ import { filter, take } from 'rxjs/operators';
 export class FuseSplashScreenService
 {
     splashScreenEl: any;
-    player: AnimationPlayer;
+    player: AnimationPlayer | undefined;
 
     /**
      * Constructor
@@ -81,6 +81,7 @@ export class FuseSplashScreenService
                 ]).create(this.splashScreenEl);
 
         setTimeout(() => {
+            if (!this.player) return;
             this.player.play();
         }, 0);
     }
@@ -101,6 +102,7 @@ export class FuseSplashScreenService
                 ]).create(this.splashScreenEl);
 
         setTimeout(() => {
+            if (!this.player) return;
             this.player.play();
         }, 0);
     }

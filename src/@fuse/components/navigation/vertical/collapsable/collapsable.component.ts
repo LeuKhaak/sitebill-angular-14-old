@@ -3,9 +3,9 @@ import { NavigationEnd, Router } from '@angular/router';
 import { merge, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 
-import { FuseNavigationItem } from '@fuse/types';
-import { fuseAnimations } from '@fuse/animations';
-import { FuseNavigationService } from '@fuse/components/navigation/navigation.service';
+import { FuseNavigationItem } from '../../../../types';
+import { fuseAnimations } from '../../../../animations';
+import { FuseNavigationService } from '../../../../components/navigation/navigation.service';
 
 @Component({
     selector   : 'fuse-nav-vertical-collapsable',
@@ -16,7 +16,7 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
 export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
 {
     @Input()
-    item: FuseNavigationItem;
+    item: FuseNavigationItem | undefined;
 
     @HostBinding('class')
     classes = 'nav-collapsable nav-item';
@@ -59,7 +59,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
                 filter(event => event instanceof NavigationEnd),
                 takeUntil(this._unsubscribeAll)
             )
-            .subscribe((event: NavigationEnd) => {
+            .subscribe((event: any) => {
 
                 // Check if the url can be found in
                 // one of the children of this item
@@ -133,7 +133,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next();
+        this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
 
@@ -146,7 +146,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
      *
      * @param ev
      */
-    toggleOpen(ev): void
+    toggleOpen(ev: any): void // any???
     {
         ev.preventDefault();
 
@@ -154,7 +154,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
 
         // Navigation collapse toggled...
         this._fuseNavigationService.onItemCollapsed.next(this.item);
-        this._fuseNavigationService.onItemCollapseToggled.next();
+        this._fuseNavigationService.onItemCollapseToggled.next(null);
     }
 
     /**
@@ -172,7 +172,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
-        this._fuseNavigationService.onItemCollapseToggled.next();
+        this._fuseNavigationService.onItemCollapseToggled.next(null);
     }
 
     /**
@@ -190,7 +190,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
         // Mark for check
         this._changeDetectorRef.markForCheck();
 
-        this._fuseNavigationService.onItemCollapseToggled.next();
+        this._fuseNavigationService.onItemCollapseToggled.next(null);
     }
 
     /**
@@ -201,7 +201,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
      * @param item
      * @returns {boolean}
      */
-    isChildrenOf(parent, item): boolean
+    isChildrenOf(parent: any, item: any): boolean // any???
     {
         const children = parent.children;
 
@@ -237,7 +237,7 @@ export class FuseNavVerticalCollapsableComponent implements OnInit, OnDestroy
      * @param url
      * @returns {boolean}
      */
-    isUrlInChildren(parent, url): boolean
+    isUrlInChildren(parent: any, url: string): boolean // any???
     {
         const children = parent.children;
 
