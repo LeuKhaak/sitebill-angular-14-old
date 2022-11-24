@@ -1,1 +1,42 @@
-<p>grid works!</p>
+<div>GRID</div>
+<common-template
+  [entity]="entity"
+  [disable_activation_button]="disable_activation_button"
+  [disable_delete_button]="disable_delete_button"
+  [disable_edit_button]="disable_edit_button"
+  [disable_view_button]="disable_view_button"
+  [enable_coworker_button]="enable_coworker_button"
+  [enable_testimonials_button]="enable_testimonials_button"
+  [enable_building_blocks_button]="enable_building_blocks_button"
+  [disable_gallery_controls]="disable_gallery_controls"
+  [complaint_mode]="complaint_mode"
+
+  xmlns:filtersMode="http://www.w3.org/1999/xhtml">
+</common-template>
+
+<!--(viewEvent)="view($event)"-->
+<!--(edit_formEvent)="edit_form($event)"-->
+<!--(deleteEvent)="delete($event)"-->
+<!--(reportEvent)="report($event)"-->
+<!--(coworkersEvent)="coworkers($event)"-->
+<!--(testimonialsEvent)="testimonials($event)"-->
+<!--(building_blocksEvent)="building_blocks($event)"-->
+<!--(view_galleryEvent)="view_gallery($event)"-->
+<!--(view_whatsappEvent)="view_whatsapp($event)"-->
+<!--(view_injectorEvent)="view_injector($event)"-->
+<!--(toggle_activeEvent)="toggle_active($event)"-->
+<!--(toggle_collectionEvent)="toggle_collection($event)"-->
+
+<mat-sidenav-container>
+
+  <ngx-datatable
+    [rows]="rows_data"
+    [columnMode]="'force'"
+    [columns]="data_columns"
+    [count]="20"
+    [externalPaging]="true"
+    [rowHeight]="50"
+    [virtualization]="false"
+  ></ngx-datatable>
+
+</mat-sidenav-container>
