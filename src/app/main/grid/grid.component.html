@@ -30,12 +30,15 @@
 <mat-sidenav-container>
 
   <ngx-datatable
+    class="{{getTableHeight()}} material expandable"
     [rows]="rows_data"
     [columnMode]="'force'"
     [columns]="data_columns"
     [count]="20"
     [externalPaging]="true"
     [rowHeight]="50"
+    [headerHeight]="120"
+    [footerHeight]="120"
     [virtualization]="false"
   ></ngx-datatable>
 

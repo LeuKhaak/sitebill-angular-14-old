@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {ModelService} from '../../_services/_modelservice/model.service';
+import {ConfigService} from '../../_services/config.service';
 import {Subject} from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -15,7 +16,7 @@ export class GridComponent implements OnInit {
 
   rows_data: any[] = [];
   data_columns: any[] = [];
-  columns_index: any[] = [];
+  columns_index: {[index: string]: any} = {};
   grid_columns_for_compose: any[] = [];
   compose_complete = false;
   loadingIndicator = true;
@@ -122,6 +123,7 @@ export class GridComponent implements OnInit {
 
   constructor(
     public modelService: ModelService,
+    public configService: ConfigService,
   ) {
     this._unsubscribeAll = new Subject();
     this.entity = new SitebillEntity();
@@ -163,7 +165,7 @@ export class GridComponent implements OnInit {
         //   this.rise_error(result_f1.message);
         // } else {
         //   // this.item_model = result.rows[0];
-        //   this.entity.model = result_f1.columns;
+          this.entity.model = result_f1.columns;
         //   // this.item_model = result.columns;
           this.columns_index = result_f1.columns_index;
         //   this.rows_index = result_f1.rows_index;
@@ -189,6 +191,7 @@ export class GridComponent implements OnInit {
         //
         //   this.grid_meta = result_f1.grid_columns.meta;
           let model_compose = this.entity.model;
+          console.log('MDEL', model_compose);
           this.compose_columns(this.grid_columns_for_compose, model_compose);
 
           // console.log(this.item_model);
@@ -238,7 +241,7 @@ export class GridComponent implements OnInit {
     // console.log(model);
     // console.log(model.length);
     // console.log(model[0]);
-    console.log(columns_list);
+    console.log('LIST', columns_list);
     // console.log(this.columns_index);
 
     // if (this.compose_complete) {
@@ -257,7 +260,9 @@ export class GridComponent implements OnInit {
         resizeable: false,
       }];
     }
-    // this.entity.add_column(model[this.columns_index[this.entity.primary_key]].name);
+    if (model[this.columns_index[this.entity.primary_key]]) {
+      this.entity.add_column(model[this.columns_index[this.entity.primary_key]].name);
+    }
 
     this.data_columns.push(this.get_control_column());
     // console.log(this.grid_meta);
@@ -266,101 +271,105 @@ export class GridComponent implements OnInit {
         if (this.columns_index[row] == null) {
           return;
         }
-        if (!model[this.columns_index[row]]) return;
-        this.entity.add_column(model[this.columns_index[row]].name);
-        let cellTemplate = null;
-        let prop = '';
-        let width = 150;
-        prop = model[this.columns_index[row]].name + '.value';
-        // if (this.grid_meta != null) {
-        //   if (this.grid_meta['columns'] != null) {
-        //     if (this.grid_meta['columns'][model[this.columns_index[row]].name] != null) {
-        //       width = this.grid_meta['columns'][model[this.columns_index[row]].name].width;
-        //       // console.log(model[this.columns_index[row]].name);
-        //       // console.log(width);
-        //     }
-        //   }
-        // }
-        if (!this.commonTemplate) return;
-        switch (model[this.columns_index[row]].type) {
-          case 'safe_string':
-            if (this.isMessengerEnabled(model[this.columns_index[row]])) {
-              cellTemplate = this.commonTemplate.whatsAppTmpl;
-            }
-            break;
+        console.log('YES', index, model[this.columns_index[row]]);
+        if (model[this.columns_index[row]]) {
+          this.entity.add_column(model[this.columns_index[row]].name);
+          let cellTemplate = null;
+          let prop = '';
+          let width = 150;
+          prop = model[this.columns_index[row]].name + '.value';
+          // if (this.grid_meta != null) {
+          //   if (this.grid_meta['columns'] != null) {
+          //     if (this.grid_meta['columns'][model[this.columns_index[row]].name] != null) {
+          //       width = this.grid_meta['columns'][model[this.columns_index[row]].name].width;
+          //       // console.log(model[this.columns_index[row]].name);
+          //       // console.log(width);
+          //     }
+          //   }
+          // }
+          if (!this.commonTemplate) return;
+          switch (model[this.columns_index[row]].type) {
+            case 'safe_string':
+              if (this.isMessengerEnabled(model[this.columns_index[row]])) {
+                cellTemplate = this.commonTemplate.whatsAppTmpl;
+              }
+              break;
 
-          case 'textarea':
-          case 'textarea_editor':
-            // console.log(model[this.columns_index[row]].name);
-            cellTemplate = this.commonTemplate.textTmpl;
-            break;
+            case 'textarea':
+            case 'textarea_editor':
+              // console.log(model[this.columns_index[row]].name);
+              cellTemplate = this.commonTemplate.textTmpl;
+              break;
 
-          case 'dttime':
-            cellTemplate = this.commonTemplate.dttimeTmpl;
-            break;
+            case 'dttime':
+              cellTemplate = this.commonTemplate.dttimeTmpl;
+              break;
 
-          case 'dtdatetime':
-            cellTemplate = this.commonTemplate.dtdatetimeTmpl;
-            break;
+            case 'dtdatetime':
+              cellTemplate = this.commonTemplate.dtdatetimeTmpl;
+              break;
 
-          case 'dtdate':
-            cellTemplate = this.commonTemplate.dtdateTmpl;
-            break;
+            case 'dtdate':
+              cellTemplate = this.commonTemplate.dtdateTmpl;
+              break;
 
-          case 'injector':
-            cellTemplate = this.commonTemplate.injectorTmpl;
-            break;
+            case 'injector':
+              cellTemplate = this.commonTemplate.injectorTmpl;
+              break;
 
-          case 'geodata':
-            cellTemplate = this.commonTemplate.geoTmpl;
-            prop = model[this.columns_index[row]].name + '.value_string';
-            break;
+            case 'geodata':
+              cellTemplate = this.commonTemplate.geoTmpl;
+              prop = model[this.columns_index[row]].name + '.value_string';
+              break;
 
-          case 'checkbox':
-            cellTemplate = this.commonTemplate.checkboxTmpl;
-            break;
+            case 'checkbox':
+              cellTemplate = this.commonTemplate.checkboxTmpl;
+              break;
 
-          case 'photo':
-            cellTemplate = this.commonTemplate.photoTmpl;
-            break;
+            case 'photo':
+              cellTemplate = this.commonTemplate.photoTmpl;
+              break;
 
-          case 'price':
-            cellTemplate = this.commonTemplate.priceTmpl;
-            break;
+            case 'price':
+              cellTemplate = this.commonTemplate.priceTmpl;
+              break;
 
-          case 'uploads':
-            cellTemplate = this.commonTemplate.imageTmpl;
-            break;
+            case 'uploads':
+              cellTemplate = this.commonTemplate.imageTmpl;
+              break;
 
-          case 'select_by_query_multi':
-            // console.log(this.commonTemplate.select_by_query_multi_Tmpl);
-            // console.log(row);
-            cellTemplate = this.commonTemplate.select_by_query_multi_Tmpl;
-            break;
+            case 'select_by_query_multi':
+              // console.log(this.commonTemplate.select_by_query_multi_Tmpl);
+              // console.log(row);
+              cellTemplate = this.commonTemplate.select_by_query_multi_Tmpl;
+              break;
 
-          default:
-            if (this.isMessengerEnabled(model[this.columns_index[row]])) {
-              cellTemplate = this.commonTemplate.whatsAppTmpl;
-            } else {
-              cellTemplate = null;
-            }
-            prop = model[this.columns_index[row]].name + '.value_string';
+            default:
+              if (this.isMessengerEnabled(model[this.columns_index[row]])) {
+                cellTemplate = this.commonTemplate.whatsAppTmpl;
+              } else {
+                cellTemplate = null;
+              }
+              prop = model[this.columns_index[row]].name + '.value_string';
 
+          }
+
+          let column = {
+            headerTemplate: this.get_header_template(),
+            cellTemplate: cellTemplate,
+            type: model[this.columns_index[row]].type,
+            ngx_name: model[this.columns_index[row]].name + '.title',
+            model_name: model[this.columns_index[row]].name,
+            title: model[this.columns_index[row]].title,
+            width: width,
+            prop: prop
+          }
+          console.log('COL-1', column);
+          this.data_columns.push(column);
         }
-
-        let column = {
-          headerTemplate: this.get_header_template(),
-          cellTemplate: cellTemplate,
-          type: model[this.columns_index[row]].type,
-          ngx_name: model[this.columns_index[row]].name + '.title',
-          model_name: model[this.columns_index[row]].name,
-          title: model[this.columns_index[row]].title,
-          width: width,
-          prop: prop
-        }
-        this.data_columns.push(column);
       });
     }
+    console.log('COL', this.data_columns);
     this.after_compose();
     // console.log(this.data_columns);
   }
@@ -388,5 +397,13 @@ export class GridComponent implements OnInit {
     return false;
   }
 
-
+  getTableHeight() {
+    if ( this.disable_fix_table_height ) {
+      return '';
+    }
+    if ( this.configService.getDomConfigValue('standalone_mode' ) ) {
+      return ' table-height ';
+    }
+    return '';
+  }
 }
