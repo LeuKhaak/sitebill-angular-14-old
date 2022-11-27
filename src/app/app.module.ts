@@ -24,6 +24,14 @@ import {ModelService} from './_services/_modelservice/model.service';
 import {GetApiUrlService} from './_services/_getapiurlservice/get-api-url.service';
 import {MatIconModule} from '@angular/material/icon';
 
+import {FuseSharedModule} from '../@fuse/shared.module';
+import {FuseModule} from '../@fuse/fuse.module';
+// import {FuseProgressBarModule} from '../@fuse/components';
+// import {FuseSidebarModule} from '../@fuse/components';
+// import {FuseThemeOptionsModule} from '../@fuse/components';
+import {fuseConfig} from './fuse-config';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -39,6 +47,16 @@ import {MatIconModule} from '@angular/material/icon';
     BrowserAnimationsModule,
     MatSnackBarModule,
     MatIconModule,
+
+    // Fuse modules
+    FuseModule.forRoot(fuseConfig),
+    //FuseProgressBarModule,
+    FuseSharedModule,
+    // FuseSidebarModule,
+    // FuseThemeOptionsModule,
+
+    // App modules
+    // SharedModule,
   ],
   providers: [
     UiService,

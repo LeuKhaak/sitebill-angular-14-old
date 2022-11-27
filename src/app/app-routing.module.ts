@@ -3,6 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 
 const appRoutes: Routes = [
   {
+    path: '', // TMP
+    loadChildren: () => import('src/app/main/grid/grid.module').then(m => m.GridModule)
+  },
+  {
     path: 'grid',
     loadChildren: () => import('src/app/main/grid/grid.module').then(m => m.GridModule)
   },
